@@ -1,0 +1,21 @@
+[
+  { "targetMuscle": "abs", "exerciseCount": 170 },
+  { "targetMuscle": "glutes", "exerciseCount": 277 },
+  { "targetMuscle": "pectorals", "exerciseCount": 155 },
+  { "targetMuscle": "calves", "exerciseCount": 196 },
+  { "targetMuscle": "lats", "exerciseCount": 134 },
+  { "targetMuscle": "quads", "exerciseCount": 43 },
+  { "targetMuscle": "triceps", "exerciseCount": 377 },
+  { "targetMuscle": "biceps", "exerciseCount": 368 },
+  { "targetMuscle": "delts", "exerciseCount": 143 },
+  { "targetMuscle": "upper back", "exerciseCount": 244 },
+  { "targetMuscle": "forearms", "exerciseCount": 117 },
+  { "targetMuscle": "traps", "exerciseCount": 30 },
+  { "targetMuscle": "hamstrings", "exerciseCount": 272 },
+  { "targetMuscle": "cardiovascular system", "exerciseCount": 29 },
+  { "targetMuscle": "adductors", "exerciseCount": 22 },
+  { "targetMuscle": "serratus anterior", "exerciseCount": 39 },
+  { "targetMuscle": "spine", "exerciseCount": 38 },
+  { "targetMuscle": "levator scapulae", "exerciseCount": 8 },
+  { "targetMuscle": "abductors", "exerciseCount": 19 }
+]

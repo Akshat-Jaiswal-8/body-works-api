@@ -1,0 +1,12 @@
+[
+  { "bodyPart": "waist", "exerciseCount": 163 },
+  { "bodyPart": "upper legs", "exerciseCount": 221 },
+  { "bodyPart": "chest", "exerciseCount": 157 },
+  { "bodyPart": "lower legs", "exerciseCount": 58 },
+  { "bodyPart": "back", "exerciseCount": 201 },
+  { "bodyPart": "upper arms", "exerciseCount": 287 },
+  { "bodyPart": "shoulders", "exerciseCount": 141 },
+  { "bodyPart": "lower arms", "exerciseCount": 35 },
+  { "bodyPart": "cardio", "exerciseCount": 28 },
+  { "bodyPart": "neck", "exerciseCount": 2 }
+]
