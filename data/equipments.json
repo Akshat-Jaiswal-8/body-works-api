@@ -1,0 +1,142 @@
+[
+   {
+      "imageUrl": "/assets/category-images/equipment-images/body-weight.webp",
+      "equipment": "body weight",
+      "exerciseCount": 315
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/leverage-machine.webp",
+      "equipment": "leverage machine",
+      "exerciseCount": 83
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/assisted.webp",
+      "equipment": "assisted",
+      "exerciseCount": 15
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/band.webp",
+      "equipment": "band",
+      "exerciseCount": 53
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/barbell.webp",
+      "equipment": "barbell",
+      "exerciseCount": 149
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/rope.webp",
+      "equipment": "rope",
+      "exerciseCount": 9
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/cable.webp",
+      "equipment": "cable",
+      "exerciseCount": 157
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/stability-ball.webp",
+      "equipment": "stability ball",
+      "exerciseCount": 26
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/dumbbell.webp",
+      "equipment": "dumbbell",
+      "exerciseCount": 286
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/ez-barbell.webp",
+      "equipment": "ez barbell",
+      "exerciseCount": 22
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/sled-machine.webp",
+      "equipment": "sled machine",
+      "exerciseCount": 15
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/upper-body-ergometer.webp",
+      "equipment": "upper body ergometer",
+      "exerciseCount": 1
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/kettlebell.webp",
+      "equipment": "kettlebell",
+      "exerciseCount": 41
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/medicine-ball.webp",
+      "equipment": "medicine ball",
+      "exerciseCount": 11
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/resistance-band.webp",
+      "equipment": "resistance band",
+      "exerciseCount": 7
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/skierg-machine.webp",
+      "equipment": "skierg machine",
+      "exerciseCount": 1
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/hammer.webp",
+      "equipment": "hammer",
+      "exerciseCount": 1
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/smith-machine.webp",
+      "equipment": "smith machine",
+      "exerciseCount": 48
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/weighted.webp",
+      "equipment": "weighted",
+      "exerciseCount": 35
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/stepmill-machine.webp",
+      "equipment": "stepmill machine",
+      "exerciseCount": 1
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/wheel-roller.webp",
+      "equipment": "wheel roller",
+      "exerciseCount": 1
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/olympic-barbell.webp",
+      "equipment": "olympic barbell",
+      "exerciseCount": 2
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/bosu-ball.webp",
+      "equipment": "bosu ball",
+      "exerciseCount": 2
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/tire.webp",
+      "equipment": "tire",
+      "exerciseCount": 1
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/elliptical-machine.webp",
+      "equipment": "elliptical machine",
+      "exerciseCount": 1
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/roller.webp",
+      "equipment": "roller",
+      "exerciseCount": 8
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/trap-bar.webp",
+      "equipment": "trap bar",
+      "exerciseCount": 1
+   },
+   {
+      "imageUrl": "/assets/category-images/equipment-images/stationary-bike.webp",
+      "equipment": "stationary bike",
+      "exerciseCount": 1
+   }
+]

@@ -1,0 +1,351 @@
+{
+   "category": [
+      {
+         "title": "Workouts For Men",
+         "imageUrl": "/routine-category/category/workoutsformen.jpg",
+         "nRoutines": 99
+      },
+      {
+         "title": "Workouts For Women",
+         "imageUrl": "/routine-category/category/workoutsforwomen.jpg",
+         "nRoutines": 63
+      },
+      {
+         "title": "Muscle Building",
+         "imageUrl": "/routine-category/category/musclebuilding.jpg",
+         "nRoutines": 219
+      },
+      {
+         "title": "Fat Loss",
+         "imageUrl": "/routine-category/category/fatloss.jpg",
+         "nRoutines": 100
+      },
+      {
+         "title": "Increase Strength",
+         "imageUrl": "/routine-category/category/increasestrength.jpg",
+         "nRoutines": 40
+      },
+      {
+         "title": "Ab Workouts",
+         "imageUrl": "/routine-category/category/abworkouts.jpg",
+         "nRoutines": 27
+      },
+      {
+         "title": "Full Body",
+         "imageUrl": "/routine-category/category/fullbody.jpg",
+         "nRoutines": 86
+      },
+      {
+         "title": "Sports Performance",
+         "imageUrl": "/routine-category/category/sportsperformance.jpg",
+         "nRoutines": 13
+      },
+      {
+         "title": "Bodyweight",
+         "imageUrl": "/routine-category/category/bodyweight_0.jpg",
+         "nRoutines": 25
+      },
+      {
+         "title": "Beginner",
+         "imageUrl": "/routine-category/category/beginner_0.jpg",
+         "nRoutines": 40
+      },
+      {
+         "title": "At Home",
+         "imageUrl": "/routine-category/category/athome.jpg",
+         "nRoutines": 41
+      },
+      {
+         "title": "Celebrity",
+         "imageUrl": "/routine-category/category/celebrity_0.jpg",
+         "nRoutines": 57
+      },
+      {
+         "title": "Cardio",
+         "imageUrl": "/routine-category/category/cardio_0.jpg",
+         "nRoutines": 20
+      },
+      {
+         "title": "Chest Workouts",
+         "imageUrl": "/routine-category/category/chestworkouts.jpg",
+         "nRoutines": 31
+      },
+      {
+         "title": "Back Workouts",
+         "imageUrl": "/routine-category/category/backworkouts.jpg",
+         "nRoutines": 25
+      },
+      {
+         "title": "Bicep Workouts",
+         "imageUrl": "/routine-category/category/bicepworkouts.jpg",
+         "nRoutines": 25
+      },
+      {
+         "title": "Shoulder Workouts",
+         "imageUrl": "/routine-category/category/shoulderworkout.jpg",
+         "nRoutines": 23
+      },
+      {
+         "title": "Leg Workouts",
+         "imageUrl": "/routine-category/category/legworkouts.jpg",
+         "nRoutines": 30
+      },
+      {
+         "title": "Tricep Workouts",
+         "imageUrl": "/routine-category/category/tricepworkouts.jpg",
+         "nRoutines": 26
+      },
+      {
+         "title": "Glute Workouts",
+         "imageUrl": "/routine-category/category/gluteworkouts.jpg",
+         "nRoutines": 7
+      }
+   ],
+   "equipment": [
+      {
+         "imageUrl": "/category-images/equipment-images/body-weight.webp",
+         "title": "Bodyweight",
+         "nRoutines": 427
+      },
+      {
+         "imageUrl": "/category-images/equipment-images/barbell.webp",
+         "title": "Barbell",
+         "nRoutines": 467
+      },
+      {
+         "imageUrl": "/category-images/equipment-images/cable.webp",
+         "title": "Cables",
+         "nRoutines": 300
+      },
+      {
+         "imageUrl": "/category-images/equipment-images/dumbbell.webp",
+         "title": "Dumbbells",
+         "nRoutines": 486
+      },
+      {
+         "imageUrl": "/category-images/equipment-images/leverage-machine.webp",
+         "title": "Machines",
+         "nRoutines": 322
+      },
+      {
+         "imageUrl": "/category-images/equipment-images/ez-barbell.webp",
+         "title": "EZ Bar",
+         "nRoutines": 138
+      },
+      {
+         "imageUrl": "/category-images/equipment-images/kettlebell.webp",
+         "title": "Kettle Bells",
+         "nRoutines": 46
+      },
+      {
+         "imageUrl": "/category-images/equipment-images/hammer.webp",
+         "title": "Other",
+         "nRoutines": 105
+      },
+      {
+         "imageUrl": "/category-images/equipment-images/resistance-band.webp",
+         "title": "Bands",
+         "nRoutines": 56
+      },
+      {
+         "imageUrl": "/category-images/equipment-images/stability-ball.webp",
+         "title": "Exercise Ball",
+         "nRoutines": 30
+      },
+      {
+         "imageUrl": "/category-images/equipment-images/roller.webp",
+         "title": "Foam Roll",
+         "nRoutines": 3
+      },
+      {
+         "imageUrl": "/category-images/equipment-images/medicine-ball.webp",
+         "title": "Medicine Ball",
+         "nRoutines": 21
+      },
+      {
+         "imageUrl": "/category-images/equipment-images/body-weight.webp",
+         "title": "None",
+         "nRoutines": 1
+      }
+   ],
+   "gender": [
+      {
+         "imageUrl": "/routine-category/category/male-female.webp",
+         "title": "Male & Female",
+         "nRoutines": 499
+      },
+      {
+         "imageUrl": "/routine-category/category/workoutsformen.jpg",
+         "title": "Male",
+         "nRoutines": 604
+      },
+      {
+         "imageUrl": "/routine-category/category/workoutsforwomen.jpg",
+         "title": "Female",
+         "nRoutines": 540
+      }
+   ],
+   "duration": [
+      {
+         "title": "0 weeks",
+         "nRoutines": 56
+      },
+      {
+         "title": "1 week",
+         "nRoutines": 5
+      },
+      {
+         "title": "2 weeks",
+         "nRoutines": 114
+      },
+      {
+         "title": "3 weeks",
+         "nRoutines": 15
+      },
+      {
+         "title": "4 weeks",
+         "nRoutines": 77
+      },
+      {
+         "title": "5 weeks",
+         "nRoutines": 5
+      },
+      {
+         "title": "6 weeks",
+         "nRoutines": 138
+      },
+      {
+         "title": "8 weeks",
+         "nRoutines": 187
+      },
+      {
+         "title": "9 weeks",
+         "nRoutines": 6
+      },
+      {
+         "title": "10 weeks",
+         "nRoutines": 39
+      },
+      {
+         "title": "12 weeks",
+         "nRoutines": 106
+      },
+      {
+         "title": "14 weeks",
+         "nRoutines": 2
+      },
+      {
+         "title": "15 weeks",
+         "nRoutines": 1
+      },
+      {
+         "title": "16 weeks",
+         "nRoutines": 6
+      },
+      {
+         "title": "17 weeks",
+         "nRoutines": 1
+      },
+      {
+         "title": "18 weeks",
+         "nRoutines": 4
+      },
+      {
+         "title": "20 weeks",
+         "nRoutines": 4
+      },
+      {
+         "title": "36 weeks",
+         "nRoutines": 1
+      },
+      {
+         "title": "52 weeks",
+         "nRoutines": 1
+      }
+   ],
+   "level": [
+      {
+         "imageUrl": "/routine-category/category/beginner_0.jpg",
+         "title": "Beginner",
+         "nRoutines": 278
+      },
+      {
+         "imageUrl": "/routine-category/category/increasestrength.jpg",
+         "title": "Intermediate",
+         "nRoutines": 277
+      },
+      {
+         "imageUrl": "/routine-category/category/athome.jpg",
+         "title": "Advanced",
+         "nRoutines": 49
+      }
+   ],
+   "days_per_week": [
+      { "title": "1", "nRoutines": 107 },
+      { "title": "2", "nRoutines": 43 },
+      { "title": "3", "nRoutines": 158 },
+      { "title": "4", "nRoutines": 168 },
+      { "title": "5", "nRoutines": 77 },
+      { "title": "6", "nRoutines": 41 },
+      { "title": "7", "nRoutines": 10 }
+   ],
+   "main_goal": [
+      {
+         "imageUrl": "/routine-category/category/musclebuilding.jpg",
+         "title": "Build Muscle",
+         "nRoutines": 397
+      },
+      {
+         "imageUrl": "/routine-category/category/fatloss.jpg",
+         "title": "Lose Fat",
+         "nRoutines": 115
+      },
+      {
+         "imageUrl": "/routine-category/category/cardio_0.jpg",
+         "title": "General Fitness",
+         "nRoutines": 32
+      },
+      {
+         "imageUrl": "/routine-category/category/increasestrength.jpg",
+         "title": "Increase Strength",
+         "nRoutines": 47
+      },
+      {
+         "imageUrl": "/routine-category/category/sportsperformance.jpg",
+         "title": "Sports Performance",
+         "nRoutines": 8
+      },
+      {
+         "imageUrl": "/routine/31.jpg",
+         "title": "Increase Endurance",
+         "nRoutines": 5
+      }
+   ],
+   "workout_type": [
+      {
+         "imageUrl": "/routine-category/category/backworkouts.jpg",
+         "title": "Full Body",
+         "nRoutines": 139
+      },
+      {
+         "imageUrl": "/routine/366.jpg",
+         "title": "Split",
+         "nRoutines": 298
+      },
+      {
+         "imageUrl": "/routine/936.jpg",
+         "title": "Single Muscle Group",
+         "nRoutines": 144
+      },
+      {
+         "imageUrl": "/routine-category/category/cardio_0.jpg",
+         "title": "Cardio",
+         "nRoutines": 19
+      },
+      {
+         "imageUrl": "/routine-category/category/sportsperformance.jpg",
+         "title": "Sports Training",
+         "nRoutines": 4
+      }
+   ]
+}

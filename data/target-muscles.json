@@ -1,0 +1,97 @@
+[
+   {
+      "imageUrl": "/assets/category-images/target-muscle-images/abs.webp",
+      "targetMuscle": "abs",
+      "exerciseCount": 170
+   },
+   {
+      "imageUrl": "/assets/category-images/target-muscle-images/glutes.webp",
+      "targetMuscle": "glutes",
+      "exerciseCount": 277
+   },
+   {
+      "imageUrl": "/assets/category-images/target-muscle-images/pectorals.webp",
+      "targetMuscle": "pectorals",
+      "exerciseCount": 155
+   },
+   {
+      "imageUrl": "/assets/category-images/target-muscle-images/calves.webp",
+      "targetMuscle": "calves",
+      "exerciseCount": 196
+   },
+   {
+      "imageUrl": "/assets/category-images/target-muscle-images/lats.webp",
+      "targetMuscle": "lats",
+      "exerciseCount": 134
+   },
+   {
+      "imageUrl": "/assets/category-images/target-muscle-images/quads.webp",
+      "targetMuscle": "quads",
+      "exerciseCount": 43
+   },
+   {
+      "imageUrl": "/assets/category-images/target-muscle-images/triceps.webp",
+      "targetMuscle": "triceps",
+      "exerciseCount": 377
+   },
+   {
+      "imageUrl": "/assets/category-images/target-muscle-images/biceps.webp",
+      "targetMuscle": "biceps",
+      "exerciseCount": 368
+   },
+   {
+      "imageUrl": "/assets/category-images/target-muscle-images/delts.webp",
+      "targetMuscle": "delts",
+      "exerciseCount": 143
+   },
+   {
+      "imageUrl": "/assets/category-images/target-muscle-images/upper-back.webp",
+      "targetMuscle": "upper back",
+      "exerciseCount": 244
+   },
+   {
+      "imageUrl": "/assets/category-images/target-muscle-images/forearms.webp",
+      "targetMuscle": "forearms",
+      "exerciseCount": 117
+   },
+   {
+      "imageUrl": "/assets/category-images/target-muscle-images/traps.webp",
+      "targetMuscle": "traps",
+      "exerciseCount": 30
+   },
+   {
+      "imageUrl": "/assets/category-images/target-muscle-images/hamstrings.webp",
+      "targetMuscle": "hamstrings",
+      "exerciseCount": 272
+   },
+   {
+      "imageUrl": "/assets/category-images/target-muscle-images/cardiovascular-system.webp",
+      "targetMuscle": "cardiovascular system",
+      "exerciseCount": 29
+   },
+   {
+      "imageUrl": "/assets/category-images/target-muscle-images/adductors.webp",
+      "targetMuscle": "adductors",
+      "exerciseCount": 22
+   },
+   {
+      "imageUrl": "/assets/category-images/target-muscle-images/serratus-anterior.webp",
+      "targetMuscle": "serratus anterior",
+      "exerciseCount": 39
+   },
+   {
+      "imageUrl": "/assets/category-images/target-muscle-images/spine.webp",
+      "targetMuscle": "spine",
+      "exerciseCount": 38
+   },
+   {
+      "imageUrl": "/assets/category-images/target-muscle-images/levator-scapulae.webp",
+      "targetMuscle": "levator scapulae",
+      "exerciseCount": 8
+   },
+   {
+      "imageUrl": "/assets/category-images/target-muscle-images/abductors.webp",
+      "targetMuscle": "abductors",
+      "exerciseCount": 19
+   }
+]

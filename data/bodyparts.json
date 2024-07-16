@@ -1,0 +1,52 @@
+[
+   {
+      "imageUrl": "/assets/category-images/bodypart-images/waist.webp",
+      "bodyPart": "waist",
+      "exerciseCount": 163
+   },
+   {
+      "imageUrl": "/assets/category-images/bodypart-images/upper-legs.webp",
+      "bodyPart": "upper legs",
+      "exerciseCount": 221
+   },
+   {
+      "imageUrl": "/assets/category-images/bodypart-images/chest.webp",
+      "bodyPart": "chest",
+      "exerciseCount": 157
+   },
+   {
+      "imageUrl": "/assets/category-images/bodypart-images/lower-legs.webp",
+      "bodyPart": "lower legs",
+      "exerciseCount": 58
+   },
+   {
+      "imageUrl": "/assets/category-images/bodypart-images/back.webp",
+      "bodyPart": "back",
+      "exerciseCount": 201
+   },
+   {
+      "imageUrl": "/assets/category-images/bodypart-images/upper-arms.webp",
+      "bodyPart": "upper arms",
+      "exerciseCount": 287
+   },
+   {
+      "imageUrl": "/assets/category-images/bodypart-images/shoulders.webp",
+      "bodyPart": "shoulders",
+      "exerciseCount": 141
+   },
+   {
+      "imageUrl": "/assets/category-images/bodypart-images/lower-arms.webp",
+      "bodyPart": "lower arms",
+      "exerciseCount": 35
+   },
+   {
+      "imageUrl": "/assets/category-images/bodypart-images/cardio.webp",
+      "bodyPart": "cardio",
+      "exerciseCount": 28
+   },
+   {
+      "imageUrl": "/assets/category-images/bodypart-images/neck.webp",
+      "bodyPart": "neck",
+      "exerciseCount": 2
+   }
+]
