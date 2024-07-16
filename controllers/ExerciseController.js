@@ -47,7 +47,7 @@ export const getExercises = async (req, res) => {
       );
     }
 
-    const startIndex = page * limit;
+    const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
     const paginatedData = filteredExercises.slice(startIndex, endIndex);
     const totalPages = Math.ceil(filteredExercises.length / limit);
