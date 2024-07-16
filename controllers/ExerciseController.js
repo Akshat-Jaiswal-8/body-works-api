@@ -9,6 +9,8 @@ export const getExercises = async (req, res) => {
     const bodyPart = req.query.bodyPart;
     const search = req.query.search;
 
+    const url = `${req.get("host")}/api/v1`;
+
     let filteredExercises = exerciseData;
     if (search) {
       const searchRegex = new RegExp(search, "i");
@@ -49,12 +51,21 @@ export const getExercises = async (req, res) => {
 
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
-    const paginatedData = filteredExercises.slice(startIndex, endIndex);
     const totalPages = Math.ceil(filteredExercises.length / limit);
+    const paginatedData = filteredExercises.slice(startIndex, endIndex);
+    const finalData = paginatedData.map((finalExercise) => {
+      return {
+        ...finalExercise,
+        images: finalExercise.images.map((image) => url + image),
+        gifUrl: url + finalExercise.gifUrl,
+      };
+    });
     res.send({
+      page,
+      limit,
       totalExercises: filteredExercises.length,
       totalPages,
-      data: paginatedData,
+      data: finalData,
     });
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch exercises" });
