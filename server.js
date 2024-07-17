@@ -5,6 +5,8 @@ import exerciseRoutes from "./routes/exerciseRoutes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import bodyPartsRoutes from "./routes/bodyPartsRoutes.js";
+import targetMusclesRoutes from "./routes/targetMusclesRoutes.js";
+import equipmentsRoutes from "./routes/equipmentsRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -22,6 +24,8 @@ app.use(
 
 app.use("/api/v1/exercise", exerciseRoutes);
 app.use("/api/v1/bodyParts", bodyPartsRoutes);
+app.use("/api/v1/targetMuscles", targetMusclesRoutes);
+app.use("/api/v1/equipments", equipmentsRoutes);
 
 app.use("/", (req, res) => {
   res.send({
