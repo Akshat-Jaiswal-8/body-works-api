@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import exerciseRoutes from "./routes/exerciseRoutes.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import bodyPartsRoutes from "./routes/bodyPartsRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -20,6 +21,7 @@ app.use(
 );
 
 app.use("/api/v1/exercise", exerciseRoutes);
+app.use("/api/v1/bodyParts", bodyPartsRoutes);
 
 app.use("/", (req, res) => {
   res.send({
