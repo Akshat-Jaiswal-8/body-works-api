@@ -170,6 +170,6 @@ export const getRoutine = (req, res) => {
       ...finalRoutine,
     });
   } catch (e) {
-    return res.status(500).send({ message: `${e}` });
+    return res.status(500).send({ message: "Internal Server Error" });
   }
 };
