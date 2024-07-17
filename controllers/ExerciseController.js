@@ -71,3 +71,34 @@ export const getExercises = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch exercises" });
   }
 };
+
+export const getExercise = (req, res) => {
+  try {
+    const { id } = req.params;
+    const url = `${req.get("host")}/api/v1`;
+
+    if (!id) {
+      return res.status(400).send({ message: "ExerciseID not found" });
+    }
+
+    let filteredExercise = exerciseData.filter(
+      (exercise) => exercise.id === id,
+    )[0];
+    if (filteredExercise.length === 0) {
+      return res.send({ status: 400, message: "Exercise not found" });
+    }
+
+    let finalExercise = {
+      ...filteredExercise,
+      images: filteredExercise.images.map((image) => url + image),
+      gifUrl: url + filteredExercise.gifUrl,
+    };
+
+    return res.status(200).send({
+      message: "Exercise: " + finalExercise.id,
+      data: finalExercise,
+    });
+  } catch (e) {
+    return res.status(500).send({ message: `${e}` });
+  }
+};
