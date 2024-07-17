@@ -9,13 +9,11 @@ export const getBodyParts = (req, res) => {
         imageUrl: url + bodyPart.imageUrl,
       };
     });
-    return res.send({
-      status: 200,
-      message: "success",
+    return res.status(200).send({
       totalBodyParts: finalBodyParts.length,
       data: finalBodyParts,
     });
   } catch (e) {
-    res.send({ status: 500, message: `${e}` });
+    res.status(500).send({ message: "Failed to fetch body parts." });
   }
 };

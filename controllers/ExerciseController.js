@@ -60,15 +60,13 @@ export const getExercises = async (req, res) => {
         gifUrl: url + finalExercise.gifUrl,
       };
     });
-    res.send({
-      page,
-      limit,
+    res.status(200).send({
       totalExercises: filteredExercises.length,
       totalPages,
       data: finalData,
     });
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch exercises" });
+    res.status(500).send({ message: "Failed to fetch exercises." });
   }
 };
 
@@ -85,7 +83,7 @@ export const getExercise = (req, res) => {
       (exercise) => exercise.id === id,
     )[0];
     if (filteredExercise.length === 0) {
-      return res.send({ status: 400, message: "Exercise not found" });
+      return res.status(400).send({ message: "Exercise not found" });
     }
 
     let finalExercise = {
@@ -95,10 +93,9 @@ export const getExercise = (req, res) => {
     };
 
     return res.status(200).send({
-      message: "Exercise: " + finalExercise.id,
       data: finalExercise,
     });
   } catch (e) {
-    return res.status(500).send({ message: `${e}` });
+    return res.status(500).send({ message: "Failed to fetch exercise" });
   }
 };

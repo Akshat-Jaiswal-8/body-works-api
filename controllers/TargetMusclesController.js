@@ -9,13 +9,11 @@ export const getTargetMuscles = (req, res) => {
         imageUrl: url + targetMuscle.imageUrl,
       };
     });
-    return res.send({
-      status: 200,
-      message: "success",
+    return res.status(200).send({
       totalTargetMuscles: finalTargetMuscles.length,
       data: finalTargetMuscles,
     });
   } catch (e) {
-    res.send({ status: 500, message: `${e}` });
+    res.status(500).send({ message: `${e}` });
   }
 };

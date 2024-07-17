@@ -136,7 +136,7 @@ export const getRoutines = (req, res) => {
       finalData,
     });
   } catch (e) {
-    res.status(500).send({ message: `${e}` });
+    res.status(500).send({ message: "Failed to fetch routines." });
   }
 };
 
@@ -154,7 +154,7 @@ export const getRoutine = (req, res) => {
     )[0];
 
     if (filteredRoutine.length === 0) {
-      return res.send({ status: 400, message: "Routine not found" });
+      return res.status(400).send({ message: "Routine not found" });
     }
 
     let finalRoutine = {

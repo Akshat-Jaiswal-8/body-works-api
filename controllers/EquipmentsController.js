@@ -9,13 +9,11 @@ export const getEquipments = (req, res) => {
         imageUrl: url + equipment.imageUrl,
       };
     });
-    return res.send({
-      status: 200,
-      message: "success",
+    return res.status(200).send({
       totalEquipments: finalEquipments.length,
       data: finalEquipments,
     });
   } catch (e) {
-    res.send({ status: 500, message: `${e}` });
+    res.status(500).send({ message: "Failed to fetch Equipments." });
   }
 };
