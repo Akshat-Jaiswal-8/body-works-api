@@ -9,7 +9,7 @@ export const getExercises = async (req, res) => {
     const bodyPart = req.query.bodyPart;
     const search = req.query.search;
 
-    const url = `${req.get("host")}/api/v1`;
+    const url = `${req.get("host")}`;
 
     let filteredExercises = exerciseData;
     if (search) {
@@ -75,7 +75,7 @@ export const getExercises = async (req, res) => {
 export const getExercise = (req, res) => {
   try {
     const { id } = req.params;
-    const url = `${req.get("host")}/api/v1`;
+    const url = `${req.get("host")}`;
 
     if (!id) {
       return res.status(400).send({ message: "ExerciseID not found" });

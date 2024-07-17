@@ -1,7 +1,7 @@
 import targetMuscles from "../data/target-muscles.json" assert { type: "json" };
 export const getTargetMuscles = (req, res) => {
   try {
-    const url = `${req.get("host")}/api/v1`;
+    const url = `${req.get("host")}`;
 
     const finalTargetMuscles = targetMuscles.map((targetMuscle) => {
       return {
