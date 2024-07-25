@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
+import helmet from "helmet";
+import { rateLimit } from "express-rate-limit";
 import { fileURLToPath } from "url";
 import exerciseRoutes from "./routes/exerciseRoutes.js";
 import bodyPartsRoutes from "./routes/bodyPartsRoutes.js";
@@ -10,8 +12,19 @@ import equipmentsRoutes from "./routes/equipmentsRoutes.js";
 import routinesRoutes from "./routes/routinesRoutes.js";
 
 dotenv.config();
+
+// Limited each IP address to 100 requests per window size (15 mins).
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+});
+
 const app = express();
 
+app.use(limiter);
+app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
