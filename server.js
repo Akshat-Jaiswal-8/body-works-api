@@ -13,10 +13,10 @@ import routinesRoutes from "./routes/routinesRoutes.js";
 
 dotenv.config();
 
-// Limited each IP address to 100 requests per window size (15 mins).
+// Limited each IP address to 1000 requests per window size (5 mins).
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 100,
+  windowMs: 5 * 60 * 1000,
+  limit: 1000,
   standardHeaders: "draft-7",
   legacyHeaders: false,
 });
