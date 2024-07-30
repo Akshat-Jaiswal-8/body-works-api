@@ -1,7 +1,7 @@
 import equipments from "../data/equipments.json" assert { type: "json" };
 export const getEquipments = (req, res) => {
   try {
-    const url = `${req.get("host")}`;
+    const url = "https://body-works-api.up.railway.app";
 
     const finalEquipments = equipments.map((equipment) => {
       return {

@@ -1,7 +1,7 @@
 import bodyParts from "../data/bodyparts.json" assert { type: "json" };
 export const getBodyParts = (req, res) => {
   try {
-    const url = `${req.get("host")}`;
+    const url = "https://body-works-api.up.railway.app";
 
     const finalBodyParts = bodyParts.map((bodyPart) => {
       return {

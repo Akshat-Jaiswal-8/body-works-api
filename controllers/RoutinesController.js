@@ -2,7 +2,7 @@ import routines from "../data/routine-data.json" assert { type: "json" };
 
 export const getRoutines = (req, res) => {
   try {
-    const url = `${req.get("host")}`;
+    const url = "https://body-works-api.up.railway.app";
     const limit = parseInt(req.query.limit) || 10;
     const page = parseInt(req.query.page) || 1;
     const goal = req.query.goal;
@@ -142,7 +142,7 @@ export const getRoutines = (req, res) => {
 
 export const getRoutine = (req, res) => {
   try {
-    const url = `${req.get("host")}`;
+    const url = "https://body-works-api.up.railway.app";
     const { id } = req.params;
 
     if (!id) {
