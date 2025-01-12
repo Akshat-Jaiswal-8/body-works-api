@@ -1,4 +1,5 @@
 import routines from "../data/routine-data.json" assert { type: "json" };
+import routinesFilter from "../data/routine-filter.json" assert { type: "json" };
 
 export const getRoutines = (req, res) => {
   try {
@@ -170,6 +171,30 @@ export const getRoutine = (req, res) => {
       ...finalRoutine,
     });
   } catch (e) {
-    return res.status(500).send({ message: "Internal Server Error" });
+    return res.status(500).send({ message: `Unable to get the routine with id: ${req.params.id}` });
+  }
+};
+
+export const getRoutineFilter = (req, res) => {
+  try {
+    const url = "https://body-works-api.up.railway.app";
+
+    if (!routinesFilter?.category) {
+      return res.status(500).send({ message: "No categories found." });
+    }
+
+    const finalRoutineFilter = routinesFilter?.category?.map((eachRoutine) => {
+      return {
+        ...eachRoutine,
+        imageUrl: url + "/assets" + eachRoutine.imageUrl,
+      };
+    });
+
+    return res.status(200).send({
+      totalRoutinesFilter: finalRoutineFilter.length,
+      data: finalRoutineFilter,
+    });
+  } catch (e) {
+    return res.status(500).send({ message: "Unable to get routine categories." });
   }
 };
