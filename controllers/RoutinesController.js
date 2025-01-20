@@ -1,9 +1,9 @@
-import routines from "../data/routine-data.json" assert { type: "json" };
-import routinesFilter from "../data/routine-filter.json" assert { type: "json" };
+import routines from "../data/routine-data.json" with { type: "json" };
+import routinesFilter from "../data/routine-filter.json" with { type: "json" };
+import { url } from "../server.js";
 
 export const getRoutines = (req, res) => {
   try {
-    const url = "https://body-works-api.up.railway.app";
     const limit = parseInt(req.query.limit) || 10;
     const page = parseInt(req.query.page) || 1;
     const goal = req.query.goal;
@@ -137,17 +137,18 @@ export const getRoutines = (req, res) => {
       finalData,
     });
   } catch (e) {
-    res.status(500).send({ message: "Failed to fetch routines." });
+    res
+      .status(500)
+      .send({ message: "Failed to fetch routines. Please try again later." });
   }
 };
 
 export const getRoutine = (req, res) => {
   try {
-    const url = "https://body-works-api.up.railway.app";
     const { id } = req.params;
 
     if (!id) {
-      return res.status(400).send({ message: "RoutineID not found" });
+      return res.status(400).send({ message: "RoutineId not ." });
     }
 
     let filteredRoutine = routines.filter(
@@ -155,7 +156,7 @@ export const getRoutine = (req, res) => {
     )[0];
 
     if (filteredRoutine.length === 0) {
-      return res.status(400).send({ message: "Routine not found" });
+      return res.status(400).send({ message: "Routine not found." });
     }
 
     let finalRoutine = {
@@ -171,14 +172,14 @@ export const getRoutine = (req, res) => {
       ...finalRoutine,
     });
   } catch (e) {
-    return res.status(500).send({ message: `Unable to get the routine with id: ${req.params.id}` });
+    return res.status(500).send({
+      message: `Unable to get the routine with id: ${req.params.id}. Please try again later.`,
+    });
   }
 };
 
 export const getRoutineFilter = (req, res) => {
   try {
-    const url = "https://body-works-api.up.railway.app";
-
     if (!routinesFilter?.category) {
       return res.status(500).send({ message: "No categories found." });
     }
@@ -194,7 +195,9 @@ export const getRoutineFilter = (req, res) => {
       totalRoutinesFilter: finalRoutineFilter.length,
       data: finalRoutineFilter,
     });
-  } catch (e) {
-    return res.status(500).send({ message: "Unable to get routine categories." });
+  } catch (error) {
+    return res.status(500).send({
+      message: "Unable to get routine categories. Please try again later.",
+    });
   }
 };

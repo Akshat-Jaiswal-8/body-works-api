@@ -1,4 +1,5 @@
-import exerciseData from "../data/exercise-data.json" assert { type: "json" };
+import exerciseData from "../data/exercise-data.json" with { type: "json" };
+import { url } from "../server.js";
 
 export const getExercises = async (req, res) => {
   try {
@@ -8,8 +9,6 @@ export const getExercises = async (req, res) => {
     const targetMuscle = req.query.target;
     const bodyPart = req.query.bodyPart;
     const search = req.query.search;
-
-    const url = "https://body-works-api.up.railway.app";
 
     let filteredExercises = exerciseData;
     if (search) {
@@ -66,24 +65,26 @@ export const getExercises = async (req, res) => {
       data: finalData,
     });
   } catch (error) {
-    res.status(500).send({ message: "Failed to fetch exercises." });
+    res
+      .status(500)
+      .send({ message: "Failed to fetch exercises. Please try again later." });
   }
 };
 
 export const getExercise = (req, res) => {
   try {
     const { id } = req.params;
-    const url = "https://body-works-api.up.railway.app";
 
     if (!id) {
-      return res.status(400).send({ message: "ExerciseID not found" });
+      return res.status(400).send({ message: "ExerciseId not found." });
     }
 
     let filteredExercise = exerciseData.filter(
       (exercise) => exercise.id === id,
     )[0];
-    if (filteredExercise.length === 0) {
-      return res.status(400).send({ message: "Exercise not found" });
+
+    if (!filteredExercise) {
+      return res.status(400).send({ message: "Exercise not found." });
     }
 
     let finalExercise = {
@@ -95,7 +96,9 @@ export const getExercise = (req, res) => {
     return res.status(200).send({
       data: finalExercise,
     });
-  } catch (e) {
-    return res.status(500).send({ message: "Failed to fetch exercise" });
+  } catch (error) {
+    return res.status(500).send({
+      message: "Failed to fetch the exercise. Please try again later.",
+    });
   }
 };

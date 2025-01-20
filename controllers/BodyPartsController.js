@@ -1,9 +1,18 @@
-import bodyParts from "../data/bodyparts.json" assert { type: "json" };
+import bodyParts from "../data/bodyparts.json" with { type: "json" };
+import { url } from "../server.js";
+
 export const getBodyParts = (req, res) => {
   try {
-    const url = "https://body-works-api.up.railway.app";
+    const limit = parseInt(req.query.limit);
+    let paginatedData = bodyParts;
 
-    const finalBodyParts = bodyParts.map((bodyPart) => {
+    if (limit && limit < bodyParts.length) {
+      const startIndex = 0;
+      const endIndex = startIndex + limit;
+      paginatedData = bodyParts.slice(startIndex, endIndex);
+    }
+
+    const finalBodyParts = paginatedData.map((bodyPart) => {
       return {
         ...bodyPart,
         imageUrl: url + bodyPart.imageUrl,
@@ -13,7 +22,9 @@ export const getBodyParts = (req, res) => {
       totalBodyParts: finalBodyParts.length,
       data: finalBodyParts,
     });
-  } catch (e) {
-    res.status(500).send({ message: "Failed to fetch body parts." });
+  } catch (error) {
+    res.status(500).send({
+      message: "Failed to fetch body parts. Please try again later.",
+    });
   }
 };

@@ -1,9 +1,19 @@
-import targetMuscles from "../data/target-muscles.json" assert { type: "json" };
+import targetMusclesData from "../data/target-muscles.json" with { type: "json" };
+
 export const getTargetMuscles = (req, res) => {
   try {
-    const url = "https://body-works-api.up.railway.app";
+    const url = process.env.BASE_URL;
+    const limit = parseInt(req.query.limit);
 
-    const finalTargetMuscles = targetMuscles.map((targetMuscle) => {
+    let paginatedData = targetMusclesData;
+
+    if (limit && limit < targetMusclesData.length) {
+      const startIndex = 0;
+      const endIndex = startIndex + limit;
+      paginatedData = targetMusclesData.slice(startIndex, endIndex);
+    }
+
+    const finalTargetMuscles = paginatedData.map((targetMuscle) => {
       return {
         ...targetMuscle,
         imageUrl: url + targetMuscle.imageUrl,
@@ -13,7 +23,9 @@ export const getTargetMuscles = (req, res) => {
       totalTargetMuscles: finalTargetMuscles.length,
       data: finalTargetMuscles,
     });
-  } catch (e) {
-    res.status(500).send({ message: `${e}` });
+  } catch (error) {
+    res.status(500).send({
+      message: "Failed to fetch target muscles. Please try again later.",
+    });
   }
 };

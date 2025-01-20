@@ -13,7 +13,6 @@ import routinesRoutes from "./routes/routinesRoutes.js";
 
 dotenv.config();
 
-// Limited each IP address to 1000 requests per window size (5 mins).
 const limiter = rateLimit({
   windowMs: 5 * 60 * 1000,
   limit: 1000,
@@ -35,13 +34,15 @@ app.use(express.json());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+export const url = process.env.BASE_URL;
+
 app.use("/assets", express.static(path.join(__dirname, "public/assets")));
 
-app.use("/exercises", exerciseRoutes);
-app.use("/bodyParts", bodyPartsRoutes);
-app.use("/targetMuscles", targetMusclesRoutes);
-app.use("/equipments", equipmentsRoutes);
-app.use("/routines", routinesRoutes);
+app.use("/api/v1/exercises", exerciseRoutes);
+app.use("/api/v1/bodyParts", bodyPartsRoutes);
+app.use("/api/v1/targetMuscles", targetMusclesRoutes);
+app.use("/api/v1/equipments", equipmentsRoutes);
+app.use("/api/v1/routines", routinesRoutes);
 
 app.use("/", (req, res) => {
   res.send({
