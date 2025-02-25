@@ -3,7 +3,7 @@
 Welcome to the Body Works API! This API provides comprehensive information on exercises, body parts, target muscles, equipment, and routines. It is designed to help users find and utilize various fitness resources to improve their health and workout regimens.
 
 ## Base URL
-### https://body-works-api.up.railway.app
+### https://body-works-api.up.railway.app/api/v1
 
 ## Endpoints :-
 
