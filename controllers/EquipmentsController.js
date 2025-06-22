@@ -1,28 +1,41 @@
-import equipments from "../data/equipments.json" with { type: "json" };
-import { url } from "../server.js";
+import { db } from "../lib/db.js";
 
-export const getEquipments = (req, res) => {
+export const getEquipments = async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit);
-    let paginatedData = equipments;
+    const limit = parseInt(req.query?.limit) || 10;
+    const offset = parseInt(req.query?.offset) || 0;
 
-    if (limit && limit < equipments.length) {
-      const startIndex = 0;
-      const endIndex = startIndex + limit;
-      paginatedData = equipments.slice(startIndex, endIndex);
+    if (offset < 0) {
+      return res.status(400).send({
+        message: "Offset must be a non-negative integer.",
+      });
     }
 
-    const finalEquipments = paginatedData.map((equipment) => {
-      return {
-        ...equipment,
-        imageUrl: url + equipment.imageUrl,
-      };
-    });
+    const findOptions = {
+      skip: offset,
+    };
+
+    if (Number.isInteger(limit) && limit > 0) {
+      findOptions.take = limit;
+    }
+
+    const [total, equipments] = await db.$transaction([
+      db.equipments.count(),
+      db.equipments.findMany(findOptions),
+    ]);
+
     return res.status(200).send({
-      totalEquipments: finalEquipments.length,
-      data: finalEquipments,
+      totalEquipments: total,
+      count: equipments.length,
+      offset: offset,
+      limit: limit || null,
+      data: equipments,
     });
   } catch (error) {
+    console.error("Error fetching equipments:", error.message, {
+      query: req.query,
+      stack: error.stack,
+    });
     res.status(500).send({
       message: "Failed to fetch equipments. Please try again later.",
     });

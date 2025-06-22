@@ -1,201 +1,401 @@
-import routines from "../data/routine-data.json" with { type: "json" };
-import routinesFilter from "../data/routine-filter.json" with { type: "json" };
-import { url } from "../server.js";
+import { db } from "../lib/db.js";
 
-export const getRoutines = (req, res) => {
+export const getRoutines = async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit) || 10;
-    const page = parseInt(req.query.page) || 1;
-    const goal = req.query.goal;
-    const type = req.query.type;
-    const level = req.query.level;
-    const duration = req.query.duration;
-    const days_per_week = req.query.days;
-    const time = req.query.time;
-    const equipment = req.query.equipment;
-    const gender = req.query.gender;
-    const category = req.query.category;
-    const search = req.query.search;
+    const limit = parseInt(req.query?.limit) || 10;
+    const offset = parseInt(req.query?.offset) || 0;
+    const {
+      goal,
+      type,
+      level,
+      duration,
+      days_per_week,
+      time,
+      equipment,
+      gender,
+      category,
+      search,
+    } = req.query;
 
-    let filteredRoutines = routines;
+    if (offset < 0) {
+      return res.status(400).send({
+        message: "Offset must be a non-negative integer.",
+      });
+    }
+
+    if (limit && (!Number.isInteger(limit) || limit <= 0)) {
+      return res.status(400).send({
+        message: "Limit must be a positive integer.",
+      });
+    }
+
+    const filter = {};
+
     if (search) {
-      const searchRegex = new RegExp(search, "i");
-      filteredRoutines = filteredRoutines.filter(
-        (filteredRoutine) =>
-          searchRegex.test(filteredRoutine.name) ||
-          searchRegex.test(filteredRoutine.routine.routine_title) ||
-          searchRegex.test(filteredRoutine.routine.routine_description) ||
-          searchRegex.test(
-            filteredRoutine.routine.workout_summary["Main Goal"],
-          ) ||
-          searchRegex.test(
-            filteredRoutine.routine.workout_summary["Workout Type"],
-          ) ||
-          searchRegex.test(
-            filteredRoutine.routine.workout_summary["Training Level"],
-          ) ||
-          searchRegex.test(
-            filteredRoutine.routine.workout_summary["Program Duration"],
-          ) ||
-          searchRegex.test(
-            filteredRoutine.routine.workout_summary["Days Per Week"],
-          ) ||
-          searchRegex.test(
-            filteredRoutine.routine.workout_summary["Time Per Week"],
-          ) ||
-          searchRegex.test(
-            filteredRoutine.routine.workout_summary["Equipment Required"],
-          ) ||
-          searchRegex.test(
-            filteredRoutine.routine.workout_summary["Target Gender"],
-          ) ||
-          filteredRoutine.category.some((eachCategory) =>
-            searchRegex.test(eachCategory),
-          ),
-      );
+      filter.OR = [
+        {
+          routine: {
+            is: {
+              routine_title: {
+                contains: search,
+                mode: "insensitive",
+              },
+            },
+          },
+        },
+        {
+          routine: {
+            is: {
+              routine_description: {
+                contains: search,
+                mode: "insensitive",
+              },
+            },
+          },
+        },
+        {
+          routine: {
+            is: {
+              workout_summary: {
+                is: {
+                  Main_Goal: {
+                    contains: search,
+                    mode: "insensitive",
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          routine: {
+            is: {
+              workout_summary: {
+                is: {
+                  Workout_Type: {
+                    contains: search,
+                    mode: "insensitive",
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          routine: {
+            is: {
+              workout_summary: {
+                is: {
+                  Training_Level: {
+                    contains: search,
+                    mode: "insensitive",
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          routine: {
+            is: {
+              workout_summary: {
+                is: {
+                  Program_Duration: {
+                    contains: search,
+                    mode: "insensitive",
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          routine: {
+            is: {
+              workout_summary: {
+                is: {
+                  Days_Per_Week: {
+                    contains: search,
+                    mode: "insensitive",
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          routine: {
+            is: {
+              workout_summary: {
+                is: {
+                  Equipment_Required: {
+                    contains: search,
+                    mode: "insensitive",
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          routine: {
+            is: {
+              workout_summary: {
+                is: {
+                  Target_Gender: {
+                    contains: search,
+                    mode: "insensitive",
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          category: {
+            hasSome: [search],
+          },
+        },
+      ];
     }
 
     if (goal) {
-      const goalRegExp = new RegExp(goal, "i");
-      filteredRoutines = filteredRoutines.filter((routine) =>
-        goalRegExp.test(routine.routine.workout_summary["Main Goal"]),
-      );
-    }
-    if (type) {
-      const typeRegExp = new RegExp(type, "i");
-      filteredRoutines = filteredRoutines.filter((routine) =>
-        typeRegExp.test(routine.routine.workout_summary["Workout Type"]),
-      );
-    }
-    if (level) {
-      const levelRegExp = new RegExp(level, "i");
-      filteredRoutines = filteredRoutines.filter((routine) =>
-        levelRegExp.test(routine.routine.workout_summary["Training Level"]),
-      );
-    }
-    if (duration) {
-      const durationRegExp = new RegExp(duration, "i");
-      filteredRoutines = filteredRoutines.filter((routine) =>
-        durationRegExp.test(
-          routine.routine.workout_summary["Program Duration"],
-        ),
-      );
-    }
-    if (days_per_week) {
-      const daysRegExp = new RegExp(days_per_week, "i");
-      filteredRoutines = filteredRoutines.filter((routine) =>
-        daysRegExp.test(routine.routine.workout_summary["Days Per Week"]),
-      );
-    }
-    if (time) {
-      const timeRegExp = new RegExp(time, "i");
-      filteredRoutines = filteredRoutines.filter((routine) =>
-        timeRegExp.test(routine.routine.workout_summary["Time Per Workout"]),
-      );
-    }
-    if (equipment) {
-      const equipmentRegExp = new RegExp(equipment, "i");
-      filteredRoutines = filteredRoutines.filter((routine) =>
-        equipmentRegExp.test(
-          routine.routine.workout_summary["Equipment Required"],
-        ),
-      );
-    }
-    if (gender) {
-      const genderRegExp = new RegExp(gender, "i");
-      filteredRoutines = filteredRoutines.filter((routine) =>
-        genderRegExp.test(routine.routine.workout_summary["Target Gender"]),
-      );
-    }
-    if (category) {
-      const categoryRegExp = new RegExp(category, "i");
-      filteredRoutines = filteredRoutines.filter((routine) =>
-        routine.category.some((eachCategory) =>
-          categoryRegExp.test(eachCategory),
-        ),
-      );
-    }
-
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const totalPages = Math.ceil(filteredRoutines.length / limit);
-    const paginatedData = filteredRoutines.slice(startIndex, endIndex);
-
-    const finalData = paginatedData.map((routine) => {
-      return {
-        ...routine,
-        routine: {
-          ...routine.routine,
-          routine_imageUrl: url + "/assets" + routine.routine.routine_imageUrl,
+      filter.routine = {
+        ...filter.routine,
+        is: {
+          ...filter.routine?.is,
+          workout_summary: {
+            is: {
+              ...filter.routine?.is?.workout_summary?.is,
+              Main_Goal: goal,
+            },
+          },
         },
       };
-    });
+    }
+
+    if (type) {
+      filter.routine = {
+        ...filter.routine,
+        is: {
+          ...filter.routine?.is,
+          workout_summary: {
+            is: {
+              ...filter.routine?.is?.workout_summary?.is,
+              Workout_Type: type,
+            },
+          },
+        },
+      };
+    }
+
+    if (level) {
+      filter.routine = {
+        ...filter.routine,
+        is: {
+          ...filter.routine?.is,
+          workout_summary: {
+            is: {
+              ...filter.routine?.is?.workout_summary?.is,
+              Training_Level: level,
+            },
+          },
+        },
+      };
+    }
+
+    if (duration) {
+      filter.routine = {
+        ...filter.routine,
+        is: {
+          ...filter.routine?.is,
+          workout_summary: {
+            is: {
+              ...filter.routine?.is?.workout_summary?.is,
+              Program_Duration: duration,
+            },
+          },
+        },
+      };
+    }
+
+    if (days_per_week) {
+      filter.routine = {
+        ...filter.routine,
+        is: {
+          ...filter.routine?.is,
+          workout_summary: {
+            is: {
+              ...filter.routine?.is?.workout_summary?.is,
+              Days_Per_Week: days_per_week,
+            },
+          },
+        },
+      };
+    }
+
+    if (time) {
+      filter.routine = {
+        ...filter.routine,
+        is: {
+          ...filter.routine?.is,
+          workout_summary: {
+            is: {
+              ...filter.routine?.is?.workout_summary?.is,
+              Time_Per_Workout: time,
+            },
+          },
+        },
+      };
+    }
+
+    if (equipment) {
+      filter.routine = {
+        ...filter.routine,
+        is: {
+          ...filter.routine?.is,
+          workout_summary: {
+            is: {
+              ...filter.routine?.is?.workout_summary?.is,
+              Equipment_Required: equipment,
+            },
+          },
+        },
+      };
+    }
+
+    if (gender) {
+      filter.routine = {
+        ...filter.routine,
+        is: {
+          ...filter.routine?.is,
+          workout_summary: {
+            is: {
+              ...filter.routine?.is?.workout_summary?.is,
+              Target_Gender: gender,
+            },
+          },
+        },
+      };
+    }
+
+    if (category) {
+      filter.category = {
+        has: category,
+      };
+    }
+
+    const findOptions = {
+      where: filter,
+      skip: offset,
+    };
+
+    if (Number.isInteger(limit) && limit > 0) {
+      findOptions.take = limit;
+    }
+
+    const [totalRoutines, filteredRoutines] = await db.$transaction([
+      db.routines.count({
+        where: filter,
+      }),
+      db.routines.findMany(findOptions),
+    ]);
 
     return res.status(200).send({
-      totalRoutines: filteredRoutines.length,
-      totalPages,
-      finalData,
+      totalRoutines,
+      count: filteredRoutines.length,
+      offset: offset,
+      limit: limit || null,
+      data: filteredRoutines,
     });
-  } catch (e) {
-    res
-      .status(500)
-      .send({ message: "Failed to fetch routines. Please try again later." });
+  } catch (error) {
+    console.error("Error fetching routines:", error.message, {
+      query: req.query,
+      stack: error.stack,
+    });
+    res.status(500).send({
+      message: "Failed to fetch routines. Please try again later.",
+    });
   }
 };
 
-export const getRoutine = (req, res) => {
+export const getRoutine = async (req, res) => {
   try {
     const { id } = req.params;
 
     if (!id) {
-      return res.status(400).send({ message: "RoutineId not ." });
+      return res.status(400).send({ message: "RoutineId not provided." });
     }
 
-    let filteredRoutine = routines.filter(
-      (routine) => routine.id === parseInt(id),
-    )[0];
+    const filteredRoutine = await db.routines.findFirst({
+      where: { id_: parseInt(id) },
+    });
 
-    if (filteredRoutine.length === 0) {
-      return res.status(400).send({ message: "Routine not found." });
+    if (!filteredRoutine) {
+      return res.status(404).send({ message: "Routine not found." });
     }
-
-    let finalRoutine = {
-      ...filteredRoutine,
-      routine: {
-        ...filteredRoutine.routine,
-        routine_imageUrl:
-          url + "/assets" + filteredRoutine.routine.routine_imageUrl,
-      },
-    };
 
     return res.status(200).send({
-      ...finalRoutine,
+      data: filteredRoutine,
     });
-  } catch (e) {
+  } catch (error) {
+    console.error("Error fetching routine:", error.message, {
+      routineId: req.params.id,
+      stack: error.stack,
+    });
     return res.status(500).send({
       message: `Unable to get the routine with id: ${req.params.id}. Please try again later.`,
     });
   }
 };
 
-export const getRoutineFilter = (req, res) => {
+export const getFilteredRoutines = async (req, res) => {
   try {
-    if (!routinesFilter?.category) {
-      return res.status(500).send({ message: "No categories found." });
+    const filter = req.query.filter;
+
+    if (!filter) {
+      return res.status(400).send({
+        message: "Filter parameter is required.",
+      });
     }
 
-    const finalRoutineFilter = routinesFilter?.category?.map((eachRoutine) => {
-      return {
-        ...eachRoutine,
-        imageUrl: url + "/assets" + eachRoutine.imageUrl,
-      };
+    const validFilters = [
+      "category",
+      "days_per_week",
+      "duration",
+      "equipment",
+      "gender",
+      "level",
+      "main_goal",
+      "workout_type",
+    ];
+
+    if (!validFilters.includes(filter)) {
+      return res.status(400).send({
+        message: `Invalid filter. Valid filters are: ${validFilters.join(", ")}`,
+      });
+    }
+
+    const selectObject = {};
+    selectObject[filter] = true;
+
+    const filteredRoutines = await db.routinesFilter.findMany({
+      select: selectObject,
     });
 
+    const filterData = filteredRoutines.map((item) => item[filter]).flat();
+
     return res.status(200).send({
-      totalRoutinesFilter: finalRoutineFilter.length,
-      data: finalRoutineFilter,
+      totalRoutinesFilter: filterData.length,
+      count: filterData.length,
+      data: {
+        [filter]: filterData,
+      },
     });
   } catch (error) {
+    console.error("Error fetching routine categories:", error.message, {
+      stack: error.stack,
+    });
     return res.status(500).send({
       message: "Unable to get routine categories. Please try again later.",
     });

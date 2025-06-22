@@ -2,3 +2,5 @@ node_modules
 vcs.xml
 .idea
 .env
+
+/generated/prisma

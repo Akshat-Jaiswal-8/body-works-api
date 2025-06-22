@@ -1,29 +1,41 @@
-import targetMusclesData from "../data/target-muscles.json" with { type: "json" };
+import { db } from "../lib/db.js";
 
-export const getTargetMuscles = (req, res) => {
+export const getTargetMuscles = async (req, res) => {
   try {
-    const url = process.env.BASE_URL;
-    const limit = parseInt(req.query.limit);
+    const limit = parseInt(req.query?.limit) || 10;
+    const offset = parseInt(req.query?.offset) || 0;
 
-    let paginatedData = targetMusclesData;
-
-    if (limit && limit < targetMusclesData.length) {
-      const startIndex = 0;
-      const endIndex = startIndex + limit;
-      paginatedData = targetMusclesData.slice(startIndex, endIndex);
+    if (offset < 0) {
+      return res.status(400).send({
+        message: "Offset must be a non-negative integer.",
+      });
     }
 
-    const finalTargetMuscles = paginatedData.map((targetMuscle) => {
-      return {
-        ...targetMuscle,
-        imageUrl: url + targetMuscle.imageUrl,
-      };
-    });
+    const findOptions = {
+      skip: offset,
+    };
+
+    if (Number.isInteger(limit) && limit > 0) {
+      findOptions.take = limit;
+    }
+
+    const [total, targetMuscles] = await db.$transaction([
+      db.targetMuscles.count(),
+      db.targetMuscles.findMany(findOptions),
+    ]);
+
     return res.status(200).send({
-      totalTargetMuscles: finalTargetMuscles.length,
-      data: finalTargetMuscles,
+      totalTargetMuscles: total,
+      count: targetMuscles.length,
+      offset: offset,
+      limit: limit || null,
+      data: targetMuscles,
     });
   } catch (error) {
+    console.error("Error fetching target muscles:", error.message, {
+      query: req.query,
+      stack: error.stack,
+    });
     res.status(500).send({
       message: "Failed to fetch target muscles. Please try again later.",
     });

@@ -1,28 +1,41 @@
-import bodyParts from "../data/bodyparts.json" with { type: "json" };
-import { url } from "../server.js";
+import { db } from "../lib/db.js";
 
-export const getBodyParts = (req, res) => {
+export const getBodyParts = async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit);
-    let paginatedData = bodyParts;
+    const limit = parseInt(req.query?.limit);
+    const offset = parseInt(req.query?.offset);
 
-    if (limit && limit < bodyParts.length) {
-      const startIndex = 0;
-      const endIndex = startIndex + limit;
-      paginatedData = bodyParts.slice(startIndex, endIndex);
+    if (offset < 0) {
+      return res.status(400).send({
+        message: "Offset must be a non-negative integer.",
+      });
     }
 
-    const finalBodyParts = paginatedData.map((bodyPart) => {
-      return {
-        ...bodyPart,
-        imageUrl: url + bodyPart.imageUrl,
-      };
-    });
+    const findOptions = {
+      skip: offset,
+    };
+
+    if (Number.isInteger(limit) && limit > 0) {
+      findOptions.take = limit;
+    }
+
+    const [totalBodyParts, bodyParts] = await db.$transaction([
+      db.bodyParts.count(),
+      db.bodyParts.findMany(findOptions),
+    ]);
+
     return res.status(200).send({
-      totalBodyParts: finalBodyParts.length,
-      data: finalBodyParts,
+      totalBodyParts: totalBodyParts,
+      count: bodyParts.length,
+      offset: offset,
+      limit: limit || null,
+      data: bodyParts,
     });
   } catch (error) {
+    console.error("Error fetching body parts:", error.message, {
+      query: req.query,
+      stack: error.stack,
+    });
     res.status(500).send({
       message: "Failed to fetch body parts. Please try again later.",
     });

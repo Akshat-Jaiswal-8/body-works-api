@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+type RoutinesFilterCategory {
+  imageUrl  String
+  nRoutines Int
+  title     String
+}
+
+type RoutinesFilterDaysPerWeek {
+  nRoutines Int
+  title     String
+}
+
+type RoutinesFilterDuration {
+  nRoutines Int
+  title     String
+}
+
+type RoutinesFilterEquipment {
+  imageUrl  String
+  nRoutines Int
+  title     String
+}
+
+type RoutinesFilterGender {
+  imageUrl  String
+  nRoutines Int
+  title     String
+}
+
+type RoutinesFilterLevel {
+  imageUrl  String
+  nRoutines Int
+  title     String
+}
+
+type RoutinesFilterMainGoal {
+  imageUrl  String
+  nRoutines Int
+  title     String
+}
+
+type RoutinesFilterWorkoutType {
+  imageUrl  String
+  nRoutines Int
+  title     String
+}
+
+type RoutinesRoutine {
+  routine_description String
+  routine_imageUrl    String
+  routine_title       String
+  workout_plan        RoutinesRoutineWorkoutPlan[]
+  workout_summary     RoutinesRoutineWorkoutSummary
+}
+
+type RoutinesRoutineWorkoutPlan {
+  day_plan String
+  heading  String
+}
+
+type RoutinesRoutineWorkoutSummary {
+  Days_Per_Week      String  @map("Days Per Week")
+  Equipment_Required String  @map("Equipment Required")
+  Main_Goal          String  @map("Main Goal")
+  Program_Duration   String  @map("Program Duration")
+  Target_Gender      String  @map("Target Gender")
+  Time_Per_Workout   String? @map("Time Per Workout")
+  Training_Level     String  @map("Training Level")
+  Workout_Type       String  @map("Workout Type")
+}
+
+model bodyParts {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  bodyPart      String
+  exerciseCount Int
+  imageUrl      String
+}
+
+model equipments {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  equipment     String
+  exerciseCount Int
+  imageUrl      String
+}
+
+model exercises {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  blog           String
+  bodyPart       String
+  equipment      String
+  gifUrl         String
+  id_            String   @unique(map: "id_1") @map("id")
+  images         String[]
+  keywords       String[]
+  muscles_worked String   @map("muscles worked")
+  name           String
+  target         String
+  title          String
+  videos         String[]
+
+  @@index([name], map: "name_1")
+  @@index([target], map: "target_1")
+  @@index([equipment], map: "equipment_1")
+  @@index([target, equipment], map: "target_1_equipment_1")
+  @@index([bodyPart], map: "bodyPart_1")
+  @@index([target, bodyPart], map: "target_1_bodyPart_1")
+  @@index([bodyPart, equipment], map: "bodyPart_1_equipment_1")
+}
+
+model routines {
+  id       String          @id @default(auto()) @map("_id") @db.ObjectId
+  category String[]
+  id_      Int             @map("id")
+  routine  RoutinesRoutine
+}
+
+model routinesFilter {
+  id            String                      @id @default(auto()) @map("_id") @db.ObjectId
+  category      RoutinesFilterCategory[]
+  days_per_week RoutinesFilterDaysPerWeek[]
+  duration      RoutinesFilterDuration[]
+  equipment     RoutinesFilterEquipment[]
+  gender        RoutinesFilterGender[]
+  level         RoutinesFilterLevel[]
+  main_goal     RoutinesFilterMainGoal[]
+  workout_type  RoutinesFilterWorkoutType[]
+}
+
+model targetMuscles {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  exerciseCount Int
+  imageUrl      String
+  targetMuscle  String
+}
