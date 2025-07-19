@@ -2,8 +2,8 @@ import { db } from "../lib/db.js";
 
 export const getBodyParts = async (req, res) => {
   try {
-    const limit = parseInt(req.query?.limit);
-    const offset = parseInt(req.query?.offset);
+    const limit = parseInt(req.query?.limit) || 10;
+    const offset = parseInt(req.query?.offset) || 0;
 
     if (offset < 0) {
       return res.status(400).send({

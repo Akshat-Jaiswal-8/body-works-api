@@ -3,11 +3,20 @@ import { db } from "../lib/db.js";
 export const getExercises = async (req, res) => {
   try {
     const limit = parseInt(req.query?.limit) || 10;
-    const offset = parseInt(req.query?.offset) || 0;
-    const equipment = req.query?.equipment;
-    const targetMuscle = req.query?.target;
-    const bodyPart = req.query?.bodyPart;
-    const search = req.query?.search;
+    const page = parseInt(req.query?.page) || 1;
+    const offset = (page - 1) * limit;
+    const equipment = req.query?.equipment
+      ? decodeURIComponent(req.query.equipment)
+      : undefined;
+    const targetMuscle = req.query?.target
+      ? decodeURIComponent(req.query.target)
+      : undefined;
+    const bodyPart = req.query?.bodyPart
+      ? decodeURIComponent(req.query.bodyPart)
+      : undefined;
+    const search = req.query?.search
+      ? decodeURIComponent(req.query.search)
+      : undefined;
 
     if (offset < 0) {
       return res.status(400).send({
@@ -112,10 +121,13 @@ export const getExercises = async (req, res) => {
       db.exercises.findMany(findOptions),
     ]);
 
+    const totalPages = Math.ceil(totalExercises / limit);
+
     return res.status(200).send({
       totalExercises: totalExercises,
+      totalPages,
       count: exercises.length,
-      offset: offset,
+      page: page,
       limit: limit || null,
       data: exercises,
     });

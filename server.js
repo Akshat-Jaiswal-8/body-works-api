@@ -17,7 +17,7 @@ dotenv.config();
 
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 200,
+  limit: 20000,
   message: {
     error: "Too many requests from this IP, please try again later.",
   },

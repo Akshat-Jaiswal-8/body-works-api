@@ -3,7 +3,8 @@ import { db } from "../lib/db.js";
 export const getRoutines = async (req, res) => {
   try {
     const limit = parseInt(req.query?.limit) || 10;
-    const offset = parseInt(req.query?.offset) || 0;
+    const page = parseInt(req.query?.page) || 1;
+    const offset = (page - 1) * limit;
     const {
       goal,
       type,
@@ -301,8 +302,11 @@ export const getRoutines = async (req, res) => {
       db.routines.findMany(findOptions),
     ]);
 
+    const totalPages = Math.ceil(totalRoutines / limit);
+
     return res.status(200).send({
       totalRoutines,
+      totalPages,
       count: filteredRoutines.length,
       offset: offset,
       limit: limit || null,
