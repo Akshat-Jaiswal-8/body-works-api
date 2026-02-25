@@ -3,7 +3,7 @@
 Welcome to the Body Works API! This API provides comprehensive information on exercises, body parts, target muscles, equipment, and routines. It is designed to help users find and utilize various fitness resources to improve their health and workout regimens.
 
 ## Base URL
-### https://body-works-api.up.railway.app/api/v1
+### https://api.bodyworks.akshatjaiswal.me/api/v1
 
 ## Endpoints :-
 
@@ -23,7 +23,7 @@ search: anything related to exercise.
 
 - **API will look like this :**
 ```
-https://body-works-api.up.railway.app/exercises?limit=10&page=1&bodyPart=waist&equipment=body%20weight&targetMuscle=abs
+https://api.bodyworks.akshatjaiswal.me/exercises?limit=10&page=1&bodyPart=waist&equipment=body%20weight&targetMuscle=abs
 
 ```
 
@@ -60,13 +60,13 @@ keywords: string[];
             "id": "0001",
             "blog": "# 3/4 Sit-Up\n\n## Description\nThe 3/4 sit-up is an abdominal exercise that targets the rectus abdominis, commonly known as the \"six-pack\" muscles. It also engages the hip flexors and the muscles of the lower back. This exercise aims to strengthen the core muscles and improve overall abdominal stability.\n\n## Instructions\n1. Start by lying on your back on a mat or a flat surface with your knees bent and feet flat on the ground. Keep your feet hip-width apart.\n2. Place your hands lightly behind your head, supporting your neck with your fingertips. Avoid pulling on your neck during the exercise.\n3. Engage your abdominal muscles by drawing your belly button in towards your spine.\n4. Slowly lift your upper body off the ground, curling your shoulders towards your knees. Keep your lower back in contact with the ground throughout the movement.\n5. Stop when your torso is at a 45-degree angle from the ground, or when you feel a strong contraction in your abdominal muscles. This position is often referred to as the \"three-quarter\" point.\n6. Hold this position briefly, then slowly lower your upper body back down to the starting position, maintaining control and engaging your core.\n7. Repeat the movement for the desired number of repetitions.\n\n## Variations\n- Beginner Variation: If you are a beginner or have difficulty performing the full 3/4 sit-up, you can start by lifting your upper body only a few inches off the ground and gradually increase the range of motion as your core strength improves.\n- Advanced Variation: To make the exercise more challenging, you can hold a weight plate or a medicine ball against your chest while performing the 3/4 sit-up.\n\n## Muscles Worked\n- Rectus abdominis (six-pack muscles)\n- Hip flexors\n- Lower back muscles\n\n## Common Mistakes\n- Using momentum: Avoid using momentum to lift your upper body. Focus on controlled movements and use your abdominal muscles to initiate the movement.\n- Neck strain: Do not pull on your neck with your hands during the exercise. Use your fingertips for light support only.\n- Arching the lower back: Keep your lower back in contact with the ground throughout the movement to maintain proper form and prevent strain on the lower back.\n\n## Safety Precautions\n- Consult with a healthcare professional before starting any new exercise program, especially if you have a history of back or neck problems.\n- If you experience any pain or discomfort during the exercise, stop immediately and seek medical advice.\n- Engage your core muscles and maintain proper form throughout the exercise to minimize the risk of injury.\n- If you have difficulty maintaining stability or if you have a weak core, it is recommended to perform this exercise under the supervision of a qualified fitness professional.",
             "images": [
-                "body-works-api.up.railway.app/assets/images/0001/1.jpeg",
-                "body-works-api.up.railway.app/assets/images/0001/2.jpeg",
-                "body-works-api.up.railway.app/assets/images/0001/3.jpeg",
-                "body-works-api.up.railway.app/assets/images/0001/4.jpeg",
-                "body-works-api.up.railway.app/assets/images/0001/5.jpeg"
+                "api.bodyworks.akshatjaiswal.me/assets/images/0001/1.jpeg",
+                "api.bodyworks.akshatjaiswal.me/assets/images/0001/2.jpeg",
+                "api.bodyworks.akshatjaiswal.me/assets/images/0001/3.jpeg",
+                "api.bodyworks.akshatjaiswal.me/assets/images/0001/4.jpeg",
+                "api.bodyworks.akshatjaiswal.me/assets/images/0001/5.jpeg"
             ],
-            "gifUrl": "body-works-api.up.railway.app/assets/gifs/0001.gif",
+            "gifUrl": "api.bodyworks.akshatjaiswal.me/assets/gifs/0001.gif",
             "videos": [
                 "https://www.youtube.com/watch?v=-B9lsTWsJCo",
                 "https://www.youtube.com/watch?v=FXalPpHfkZk",
@@ -111,7 +111,7 @@ id : eg.0001
 ```
 - **API will look like this :**
 ```
-https://body-works-api.up.railway.app/exercises/0001
+https://api.bodyworks.akshatjaiswal.me/exercises/0001
 ```
 - **Response type :**
 ```
@@ -144,13 +144,13 @@ keywords: string[];
     "id": "0001",
     "blog": "# 3/4 Sit-Up\n\n## Description\nThe 3/4 sit-up is an abdominal exercise that targets the rectus abdominis, commonly known as the \"six-pack\" muscles. It also engages the hip flexors and the muscles of the lower back. This exercise aims to strengthen the core muscles and improve overall abdominal stability.\n\n## Instructions\n1. Start by lying on your back on a mat or a flat surface with your knees bent and feet flat on the ground. Keep your feet hip-width apart.\n2. Place your hands lightly behind your head, supporting your neck with your fingertips. Avoid pulling on your neck during the exercise.\n3. Engage your abdominal muscles by drawing your belly button in towards your spine.\n4. Slowly lift your upper body off the ground, curling your shoulders towards your knees. Keep your lower back in contact with the ground throughout the movement.\n5. Stop when your torso is at a 45-degree angle from the ground, or when you feel a strong contraction in your abdominal muscles. This position is often referred to as the \"three-quarter\" point.\n6. Hold this position briefly, then slowly lower your upper body back down to the starting position, maintaining control and engaging your core.\n7. Repeat the movement for the desired number of repetitions.\n\n## Variations\n- Beginner Variation: If you are a beginner or have difficulty performing the full 3/4 sit-up, you can start by lifting your upper body only a few inches off the ground and gradually increase the range of motion as your core strength improves.\n- Advanced Variation: To make the exercise more challenging, you can hold a weight plate or a medicine ball against your chest while performing the 3/4 sit-up.\n\n## Muscles Worked\n- Rectus abdominis (six-pack muscles)\n- Hip flexors\n- Lower back muscles\n\n## Common Mistakes\n- Using momentum: Avoid using momentum to lift your upper body. Focus on controlled movements and use your abdominal muscles to initiate the movement.\n- Neck strain: Do not pull on your neck with your hands during the exercise. Use your fingertips for light support only.\n- Arching the lower back: Keep your lower back in contact with the ground throughout the movement to maintain proper form and prevent strain on the lower back.\n\n## Safety Precautions\n- Consult with a healthcare professional before starting any new exercise program, especially if you have a history of back or neck problems.\n- If you experience any pain or discomfort during the exercise, stop immediately and seek medical advice.\n- Engage your core muscles and maintain proper form throughout the exercise to minimize the risk of injury.\n- If you have difficulty maintaining stability or if you have a weak core, it is recommended to perform this exercise under the supervision of a qualified fitness professional.",
     "images": [
-      "body-works-api.up.railway.app/assets/images/0001/1.jpeg",
-      "body-works-api.up.railway.app/assets/images/0001/2.jpeg",
-      "body-works-api.up.railway.app/assets/images/0001/3.jpeg",
-      "body-works-api.up.railway.app/assets/images/0001/4.jpeg",
-      "body-works-api.up.railway.app/assets/images/0001/5.jpeg"
+      "api.bodyworks.akshatjaiswal.me/assets/images/0001/1.jpeg",
+      "api.bodyworks.akshatjaiswal.me/assets/images/0001/2.jpeg",
+      "api.bodyworks.akshatjaiswal.me/assets/images/0001/3.jpeg",
+      "api.bodyworks.akshatjaiswal.me/assets/images/0001/4.jpeg",
+      "api.bodyworks.akshatjaiswal.me/assets/images/0001/5.jpeg"
     ],
-    "gifUrl": "body-works-api.up.railway.app/assets/gifs/0001.gif",
+    "gifUrl": "api.bodyworks.akshatjaiswal.me/assets/gifs/0001.gif",
     "videos": [
       "https://www.youtube.com/watch?v=-B9lsTWsJCo",
       "https://www.youtube.com/watch?v=FXalPpHfkZk",
@@ -190,7 +190,7 @@ keywords: string[];
 - **Method :** GET
 - **API will look like this :**
 ```
-https://body-works-api.up.railway.app/equipments
+https://api.bodyworks.akshatjaiswal.me/equipments
 ```
 - **Response type :**
 ```
@@ -225,7 +225,7 @@ equipment: string
 - **Method :** GET
 - **API will look like this :**
 ```
-https://body-works-api.up.railway.app/targetMuscles
+https://api.bodyworks.akshatjaiswal.me/targetMuscles
 ```
 - **Response type :**
 ```
@@ -259,7 +259,7 @@ equipment: string
 - **Method :** GET
 - **API will look like this :**
 ```
-https://body-works-api.up.railway.app/bodyParts
+https://api.bodyworks.akshatjaiswal.me/bodyParts
 ```
 - **Response type :**
 ```
@@ -314,7 +314,7 @@ search : eg.anything related to routine
 
 - **API will look like this :**
 ```
-https://body-works-api.up.railway.app/routines?limit=10&page=1
+https://api.bodyworks.akshatjaiswal.me/routines?limit=10&page=1
 
 ```
 
@@ -360,7 +360,7 @@ id : number;
       "routine": {
         "routine_title": "Body Like A God: A Complete Bodyweight Muscle Building Plan",
         "routine_description": "No equipment or gym? No problem. Build muscle at home with this classic bodyweight training system. This is a flexible training system that focuses on the use of exercise complexes.",
-        "routine_imageUrl": "body-works-api.up.railway.app/assets/routine/1.webp",
+        "routine_imageUrl": "api.bodyworks.akshatjaiswal.me/assets/routine/1.webp",
         "workout_summary": {
           "Main Goal": "Build Muscle",
           "Workout Type": "Full Body",
@@ -392,7 +392,7 @@ id : number;
       "routine": {
         "routine_title": "“No Juice” Advanced Bodybuilding Workout Routine",
         "routine_description": "Avoid plateauing with the \"No Juice\" routine, which manipulates intensity, frequency, and volume to help you continue progressing in the gym.",
-        "routine_imageUrl": "body-works-api.up.railway.app/assets/routine/2.webp",
+        "routine_imageUrl": "api.bodyworks.akshatjaiswal.me/assets/routine/2.webp",
         "workout_summary": {
           "Main Goal": "Build Muscle",
           "Workout Type": "Split",
@@ -454,7 +454,7 @@ id : eg.1
 ```
 - **API will look like this :**
 ```
-https://body-works-api.up.railway.app/routines/1
+https://api.bodyworks.akshatjaiswal.me/routines/1
 ```
 - **Response type :**
 ```
