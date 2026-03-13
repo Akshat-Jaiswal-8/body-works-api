@@ -30,7 +30,7 @@ export const getRoutines = async (req, res) => {
       });
     }
 
-    const filter = {};
+    const filter: any = {};
 
     if (search) {
       filter.OR = [
@@ -286,7 +286,7 @@ export const getRoutines = async (req, res) => {
       };
     }
 
-    const findOptions = {
+    const findOptions: any = {
       where: filter,
       skip: offset,
     };
@@ -380,7 +380,7 @@ export const getFilteredRoutines = async (req, res) => {
       });
     }
 
-    const selectObject = {};
+    const selectObject: any = {};
     selectObject[filter] = true;
 
     const filteredRoutines = await db.routinesFilter.findMany({

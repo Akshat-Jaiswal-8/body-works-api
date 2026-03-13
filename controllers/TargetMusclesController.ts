@@ -1,6 +1,6 @@
 import { db } from "../lib/db.js";
 
-export const getEquipments = async (req, res) => {
+export const getTargetMuscles = async (req, res) => {
   try {
     const limit = parseInt(req.query?.limit) || 10;
     const offset = parseInt(req.query?.offset) || 0;
@@ -11,7 +11,7 @@ export const getEquipments = async (req, res) => {
       });
     }
 
-    const findOptions = {
+    const findOptions: any = {
       skip: offset,
     };
 
@@ -19,25 +19,25 @@ export const getEquipments = async (req, res) => {
       findOptions.take = limit;
     }
 
-    const [total, equipments] = await db.$transaction([
-      db.equipments.count(),
-      db.equipments.findMany(findOptions),
+    const [total, targetMuscles] = await db.$transaction([
+      db.targetMuscles.count(),
+      db.targetMuscles.findMany(findOptions),
     ]);
 
     return res.status(200).send({
-      totalEquipments: total,
-      count: equipments.length,
+      totalTargetMuscles: total,
+      count: targetMuscles.length,
       offset: offset,
       limit: limit || null,
-      data: equipments,
+      data: targetMuscles,
     });
   } catch (error) {
-    console.error("Error fetching equipments:", error.message, {
+    console.error("Error fetching target muscles:", error.message, {
       query: req.query,
       stack: error.stack,
     });
     res.status(500).send({
-      message: "Failed to fetch equipments. Please try again later.",
+      message: "Failed to fetch target muscles. Please try again later.",
     });
   }
 };
