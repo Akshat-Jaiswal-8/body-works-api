@@ -2,7 +2,7 @@ import express from "express";
 import {
   getExercise,
   getExercises,
-} from "../controllers/ExerciseController.js";
+} from "../controllers/exercise-controller.js";
 
 const router = express.Router();
 

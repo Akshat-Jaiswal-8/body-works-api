@@ -3,7 +3,7 @@ import {
   getRoutine,
   getRoutines,
   getFilteredRoutines,
-} from "../controllers/RoutinesController.js";
+} from "../controllers/routines-controller.js";
 
 const router = express.Router();
 

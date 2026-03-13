@@ -1,5 +1,5 @@
 import express from "express";
-import { getTargetMuscles } from "../controllers/TargetMusclesController.js";
+import { getTargetMuscles } from "../controllers/target-muscles-controller.js";
 
 const router = express.Router();
 
