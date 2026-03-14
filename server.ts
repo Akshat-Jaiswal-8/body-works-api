@@ -86,7 +86,7 @@ app.use(
   express.static(path.join(__dirname, 'public/assets'), {
     maxAge: '1d',
     etag: false,
-    setHeaders: (res, filePath) => {
+    setHeaders: (res) => {
       res.setHeader('Cache-Control', 'public, max-age=86400');
     },
   }),
@@ -118,7 +118,7 @@ app.use('/', (req, res) => {
   });
 });
 
-app.use('*', (req, res) => {
+app.use('*', (_req, res) => {
   res.status(404).json({
     error: 'Endpoint not found',
     message: 'The requested resource does not exist',
@@ -131,8 +131,8 @@ app.use((err, req, res, next) => {
     typeof err?.status === 'number'
       ? err.status
       : typeof err?.statusCode === 'number'
-      ? err.statusCode
-      : 500;
+        ? err.statusCode
+        : 500;
 
   requestLogger.error('request.failed', {
     method: req.method,

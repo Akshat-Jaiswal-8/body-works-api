@@ -107,10 +107,12 @@ export const logger = winston.createLogger({
   ],
 });
 
-const getRequestId = (req: Request) => {
-  const headerValue = req.header('x-request-id');
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-  if (headerValue && headerValue.trim().length > 0) {
+const getRequestId = (req: Request) => {
+  const headerValue = req.header('x-request-id')?.trim();
+
+  if (headerValue && UUID_REGEX.test(headerValue)) {
     return headerValue;
   }
 
