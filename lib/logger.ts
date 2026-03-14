@@ -148,6 +148,12 @@ export const requestLoggerMiddleware = (req: Request, res: Response, next: NextF
   requestLogger.info('request.started');
 
   res.on('finish', () => {
+    if (res.locals.requestFailed) {
+      // An error for this request has already been logged; avoid duplicate completion log.
+      responseLogged = true;
+      return;
+    }
+
     responseLogged = true;
     const durationMs = Number(process.hrtime.bigint() - startedAt) / 1_000_000;
 
@@ -185,6 +191,12 @@ export const logControllerError = (
   error: unknown,
   context: Record<string, unknown> = {},
 ) => {
+  // Mark this response as having encountered a logged error so the
+  // request logger can avoid emitting a duplicate completion log.
+  if (res.locals) {
+    res.locals.requestFailed = true;
+  }
+
   getRequestLogger(res).error(message, {
     ...((redactSensitiveData(context) as Record<string, unknown>) || {}),
     error: serializeError(error),
