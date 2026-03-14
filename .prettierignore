@@ -5,3 +5,6 @@ coverage
 *.tfstate
 *.tfstate.backup
 .idea
+package-lock.json
+*-lock.yml
+*-lock.yaml
