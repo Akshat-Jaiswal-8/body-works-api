@@ -247,7 +247,7 @@ equipment: string
 - **API will look like this :**
 
 ```
-https://api.bodyworks.akshatjaiswal.me/targetMuscles
+https://api.bodyworks.akshatjaiswal.me/api/v1/targetMuscles
 ```
 
 - **Response type :**
