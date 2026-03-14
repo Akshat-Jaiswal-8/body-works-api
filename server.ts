@@ -8,6 +8,7 @@ import { fileURLToPath } from "url";
 import compression from "compression";
 import morgan from "morgan";
 import exerciseRoutes from "./routes/exercise-routes.js";
+import authRoutes from "./routes/auth-routes.js";
 import bodyPartsRoutes from "./routes/body-parts-routes.js";
 import targetMusclesRoutes from "./routes/target-muscles-routes.js";
 import equipmentsRoutes from "./routes/equipments-routes.js";
@@ -96,6 +97,7 @@ app.use(
   }),
 );
 
+app.use("/api/v1/auth", generalLimiter, authRoutes);
 app.use("/api/v1/exercises", generalLimiter, exerciseRoutes);
 app.use("/api/v1/bodyParts", generalLimiter, bodyPartsRoutes);
 app.use("/api/v1/targetMuscles", generalLimiter, targetMusclesRoutes);
