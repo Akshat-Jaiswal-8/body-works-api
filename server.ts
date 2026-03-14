@@ -128,20 +128,22 @@ app.use('*', (req, res) => {
 app.use((err, req, res, next) => {
   const requestLogger = res.locals.logger || logger;
 
+  res.status(500);
+
   requestLogger.error('request.failed', {
     method: req.method,
     path: req.originalUrl,
-    statusCode: err?.status || 500,
+    statusCode: res.statusCode,
     error: serializeError(err),
   });
 
   if (process.env.NODE_ENV === 'production') {
-    res.status(500).json({
+    res.json({
       error: 'Internal server error',
       message: 'Something went wrong',
     });
   } else {
-    res.status(500).json({
+    res.json({
       error: 'Internal server error',
       message: err.message,
       stack: err.stack,
