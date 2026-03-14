@@ -1,10 +1,8 @@
-import { User } from "@prisma/client";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import { type User } from '@prisma/client';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
-export const hashPassword = async (
-  password: string,
-): Promise<string | undefined> => {
+export const hashPassword = async (password: string): Promise<string | undefined> => {
   try {
     const saltRounds = 10;
     return await bcrypt.hash(password, saltRounds);
@@ -13,21 +11,18 @@ export const hashPassword = async (
   }
 };
 
-export const comparePassword = async (
-  password: string,
-  hashedPassword: string,
-) => {
+export const comparePassword = async (password: string, hashedPassword: string) => {
   return bcrypt.compare(password, hashedPassword);
 };
 
 export const generateAccessToken = (user: User) => {
   return jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: "3d",
+    expiresIn: '3d',
   });
 };
 
 export const generateRefreshToken = (user: User) => {
   return jwt.sign({ id: user.id }, process.env.REFRESH_TOKEN_SECRET, {
-    expiresIn: "15d",
+    expiresIn: '15d',
   });
 };

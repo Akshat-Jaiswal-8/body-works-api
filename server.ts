@@ -125,7 +125,7 @@ app.use('*', (_req, res) => {
   });
 });
 
-app.use((err, req, res, next) => {
+app.use((err, req, res, _next) => {
   const requestLogger = res.locals.logger || logger;
   const statusCode =
     typeof err?.status === 'number'

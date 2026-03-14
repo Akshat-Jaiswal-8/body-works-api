@@ -1,15 +1,15 @@
-import { Request, Response } from "express";
-import { db } from "../lib/db.js";
-import z, { success, ZodSafeParseResult } from "zod";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
-import { $ZodIssue } from "zod/v4/core";
+import { type User } from '@prisma/client';
+import { type Request, type Response } from 'express';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import z from 'zod';
+
 import {
   comparePassword,
   generateAccessToken,
   generateRefreshToken,
   hashPassword,
-} from "../helpers/auth-helper.js";
-import { User } from "@prisma/client";
+} from '../helpers/auth-helper.js';
+import { db } from '../lib/db.js';
 
 interface IRegisterUserRequestBody {
   name: string;
@@ -21,22 +21,22 @@ interface IRegisterUserRequestBody {
 const userSchema = z.object({
   name: z
     .string()
-    .min(2, { error: "Name should contain atleast 2 characters." })
-    .max(50, { error: "Name should have atmost 50 characters." }),
+    .min(2, { error: 'Name should contain atleast 2 characters.' })
+    .max(50, { error: 'Name should have atmost 50 characters.' }),
 
   email: z.email(),
 
   phone_number: z.string().transform((val, ctx) => {
     const phone = parsePhoneNumberFromString(val, {
-      defaultCountry: "IN",
+      defaultCountry: 'IN',
       extract: false,
     });
     if (phone && phone.isValid()) {
       return phone.number;
     }
     ctx.addIssue({
-      code: "custom",
-      message: "Invalid phone number",
+      code: 'custom',
+      message: 'Invalid phone number',
     });
 
     return z.NEVER;
@@ -45,23 +45,22 @@ const userSchema = z.object({
   password: z
     .string()
     .min(8, {
-      error: "Password should contain atleast 8 characters.",
+      error: 'Password should contain atleast 8 characters.',
       abort: true,
     })
     .max(16, {
-      error: "Password should contain at most 16 characters.",
+      error: 'Password should contain at most 16 characters.',
       abort: true,
     }),
 });
 
 export const registerUser = async (req: Request, res: Response) => {
   try {
-    const { name, email, phone_number, password } =
-      req.body as IRegisterUserRequestBody;
+    const { name, email, phone_number, password } = req.body as IRegisterUserRequestBody;
 
     if (!name || !email || !phone_number || !password) {
       return res.status(400).json({
-        message: "All the input fields are required.",
+        message: 'All the input fields are required.',
       });
     }
 
@@ -70,17 +69,15 @@ export const registerUser = async (req: Request, res: Response) => {
     });
 
     if (old_user)
-      return res
-        .status(409)
-        .json({ message: "User already exist. Please login again." });
+      return res.status(409).json({ message: 'User already exist. Please login again.' });
 
     const result = userSchema.safeParse(req.body);
 
     if (!result.success) {
       return res.status(400).json({
-        message: "Validation failed",
-        errors: result.error.issues.map((issue: $ZodIssue) => ({
-          field: issue.path.join("."),
+        message: 'Validation failed',
+        errors: result.error.issues.map((issue) => ({
+          field: issue.path.join('.'),
           message: issue.message,
         })),
       });
@@ -99,14 +96,12 @@ export const registerUser = async (req: Request, res: Response) => {
       },
     });
 
-    return res
-      .status(200)
-      .json({ user, message: "user created successfully." });
+    return res.status(200).json({ user, message: 'user created successfully.' });
   } catch (error) {
     console.error(error);
     res.status(500).json({
       success: false,
-      message: "Error registering the user.",
+      message: 'Error registering the user.',
       error,
     });
   }
@@ -117,16 +112,16 @@ export const loginUser = async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      res.status(400).json({ message: "All the input fields are required." });
+      res.status(400).json({ message: 'All the input fields are required.' });
     }
 
     const result = userSchema.pick({ email, password }).safeParse(req.body);
 
     if (!result.success) {
       return res.status(400).json({
-        message: "Validation failed",
-        errors: result.error.issues.map((issue: $ZodIssue) => ({
-          field: issue.path.join("."),
+        message: 'Validation failed',
+        errors: result.error.issues.map((issue) => ({
+          field: issue.path.join('.'),
           message: issue.message,
         })),
       });
@@ -141,30 +136,27 @@ export const loginUser = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "Email is not registered",
+        message: 'Email is not registered',
       });
     }
 
-    const matchPassword = await comparePassword(
-      parsedSchema.password,
-      user.passwordHash,
-    );
+    const matchPassword = await comparePassword(parsedSchema.password, user.passwordHash);
 
     if (!matchPassword) {
       return res.status(200).json({
         success: false,
-        message: "Invalid Password.",
+        message: 'Invalid Password.',
       });
     }
 
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-    res.cookie("refreshToken", refreshToken, {
+    res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "strict",
-      path: "/refresh-token",
+      sameSite: 'strict',
+      path: '/refresh-token',
     });
 
     res.status(200).json({
@@ -173,5 +165,12 @@ export const loginUser = async (req: Request, res: Response) => {
       email: user.email,
       accessToken,
     });
-  } catch (error) {}
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error logging in the user.',
+      error,
+    });
+  }
 };

@@ -10,5 +10,6 @@ if [ -n "$STAGED_FILES" ]; then
   echo "$STAGED_FILES" | xargs git add
 fi
 
+npm run lint
 echo "Running typecheck..."
 npm run typecheck
