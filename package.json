@@ -8,7 +8,9 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit",
     "start": "node dist/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "npx prettier --write \"**/*.{js,ts,json,css,md}\"",
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "",
@@ -25,15 +27,18 @@
     "helmet": "^7.1.0",
     "morgan": "^1.10.0",
     "nodemon": "^3.1.4",
-    "prettier": "^3.4.2"
+    "winston": "^3.19.0"
   },
   "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@types/compression": "^1.8.1",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/helmet": "^0.0.48",
     "@types/morgan": "^1.9.10",
     "@types/node": "^24.0.3",
+    "husky": "^9.1.7",
+    "prettier": "^3.8.1",
     "prisma": "^6.10.1",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3"

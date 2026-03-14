@@ -1,4 +1,5 @@
-import { db } from "../lib/db.js";
+import { db } from '../lib/db.js';
+import { logControllerError } from '../lib/logger.js';
 
 export const getTargetMuscles = async (req, res) => {
   try {
@@ -7,7 +8,7 @@ export const getTargetMuscles = async (req, res) => {
 
     if (offset < 0) {
       return res.status(400).send({
-        message: "Offset must be a non-negative integer.",
+        message: 'Offset must be a non-negative integer.',
       });
     }
 
@@ -32,12 +33,11 @@ export const getTargetMuscles = async (req, res) => {
       data: targetMuscles,
     });
   } catch (error) {
-    console.error("Error fetching target muscles:", error.message, {
+    logControllerError(res, 'target-muscles.list.failed', error, {
       query: req.query,
-      stack: error.stack,
     });
     res.status(500).send({
-      message: "Failed to fetch target muscles. Please try again later.",
+      message: 'Failed to fetch target muscles. Please try again later.',
     });
   }
 };

@@ -1,17 +1,18 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-import path from "path";
-import helmet from "helmet";
-import { rateLimit } from "express-rate-limit";
-import { fileURLToPath } from "url";
-import compression from "compression";
-import morgan from "morgan";
-import exerciseRoutes from "./routes/exercise-routes.js";
-import bodyPartsRoutes from "./routes/body-parts-routes.js";
-import targetMusclesRoutes from "./routes/target-muscles-routes.js";
-import equipmentsRoutes from "./routes/equipments-routes.js";
-import routinesRoutes from "./routes/routines-routes.js";
+import compression from 'compression';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import express from 'express';
+import { rateLimit } from 'express-rate-limit';
+import helmet from 'helmet';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+import { logger, requestLoggerMiddleware, serializeError } from './lib/logger.js';
+import bodyPartsRoutes from './routes/body-parts-routes.js';
+import equipmentsRoutes from './routes/equipments-routes.js';
+import exerciseRoutes from './routes/exercise-routes.js';
+import routinesRoutes from './routes/routines-routes.js';
+import targetMusclesRoutes from './routes/target-muscles-routes.js';
 
 dotenv.config();
 
@@ -19,9 +20,9 @@ const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 20000,
   message: {
-    error: "Too many requests from this IP, please try again later.",
+    error: 'Too many requests from this IP, please try again later.',
   },
-  standardHeaders: "draft-7",
+  standardHeaders: 'draft-7',
   legacyHeaders: false,
 });
 
@@ -29,15 +30,16 @@ const strictLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 20,
   message: {
-    error: "Rate limit exceeded for this endpoint.",
+    error: 'Rate limit exceeded for this endpoint.',
   },
-  standardHeaders: "draft-7",
+  standardHeaders: 'draft-7',
   legacyHeaders: false,
 });
 
 const app = express();
 
-app.set("trust proxy", 1);
+app.set('trust proxy', 1);
+app.use(requestLoggerMiddleware);
 
 app.use(
   helmet({
@@ -46,10 +48,10 @@ app.use(
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         scriptSrc: ["'self'"],
-        imgSrc: ["'self'", "data:", "https:"],
+        imgSrc: ["'self'", 'data:', 'https:'],
       },
     },
-    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
     hsts: {
       maxAge: 31536000,
       includeSubDomains: true,
@@ -61,24 +63,18 @@ app.use(
 app.use(
   cors({
     origin:
-      process.env.NODE_ENV === "production"
-        ? process.env.ALLOWED_ORIGINS?.split(",") || false
+      process.env.NODE_ENV === 'production'
+        ? process.env.ALLOWED_ORIGINS?.split(',') || false
         : true,
     credentials: false,
     optionsSuccessStatus: 200,
   }),
 );
 
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 app.use(compression());
-
-if (process.env.NODE_ENV === "production") {
-  app.use(morgan("combined"));
-} else {
-  app.use(morgan("dev"));
-}
 
 app.use(generalLimiter);
 
@@ -86,60 +82,67 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 app.use(
-  "/assets",
-  express.static(path.join(__dirname, "public/assets"), {
-    maxAge: "1d",
+  '/assets',
+  express.static(path.join(__dirname, 'public/assets'), {
+    maxAge: '1d',
     etag: false,
     setHeaders: (res, filePath) => {
-      res.setHeader("Cache-Control", "public, max-age=86400");
+      res.setHeader('Cache-Control', 'public, max-age=86400');
     },
   }),
 );
 
-app.use("/api/v1/exercises", generalLimiter, exerciseRoutes);
-app.use("/api/v1/bodyParts", generalLimiter, bodyPartsRoutes);
-app.use("/api/v1/targetMuscles", generalLimiter, targetMusclesRoutes);
-app.use("/api/v1/equipments", generalLimiter, equipmentsRoutes);
-app.use("/api/v1/routines", strictLimiter, routinesRoutes);
+app.use('/api/v1/exercises', generalLimiter, exerciseRoutes);
+app.use('/api/v1/bodyParts', generalLimiter, bodyPartsRoutes);
+app.use('/api/v1/targetMuscles', generalLimiter, targetMusclesRoutes);
+app.use('/api/v1/equipments', generalLimiter, equipmentsRoutes);
+app.use('/api/v1/routines', strictLimiter, routinesRoutes);
 
-app.get("/health", (req, res) => {
+app.get('/health', (req, res) => {
   res.status(200).json({
-    status: "OK",
+    status: 'OK',
     timestamp: new Date().toISOString(),
   });
 });
 
-app.use("/", (req, res) => {
+app.use('/', (req, res) => {
   res.set({
-    "X-Content-Type-Options": "nosniff",
-    "X-Frame-Options": "DENY",
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
   });
   res.json({
     message:
-      "Welcome to body works api! Review all the endpoints here: https://github.com/Akshat-Jaiswal-8/body-works-api.git",
-    version: "1.0.0",
-    status: "active",
+      'Welcome to body works api! Review all the endpoints here: https://github.com/Akshat-Jaiswal-8/body-works-api.git',
+    version: '1.0.0',
+    status: 'active',
   });
 });
 
-app.use("*", (req, res) => {
+app.use('*', (req, res) => {
   res.status(404).json({
-    error: "Endpoint not found",
-    message: "The requested resource does not exist",
+    error: 'Endpoint not found',
+    message: 'The requested resource does not exist',
   });
 });
 
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  const requestLogger = res.locals.logger || logger;
 
-  if (process.env.NODE_ENV === "production") {
+  requestLogger.error('request.failed', {
+    method: req.method,
+    path: req.originalUrl,
+    statusCode: err?.status || 500,
+    error: serializeError(err),
+  });
+
+  if (process.env.NODE_ENV === 'production') {
     res.status(500).json({
-      error: "Internal server error",
-      message: "Something went wrong",
+      error: 'Internal server error',
+      message: 'Something went wrong',
     });
   } else {
     res.status(500).json({
-      error: "Internal server error",
+      error: 'Internal server error',
       message: err.message,
       stack: err.stack,
     });
@@ -149,23 +152,66 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 8000;
 
 const server = app.listen(PORT, () => {
-  console.log(
-    `Server running on port ${PORT} in ${
-      process.env.NODE_ENV || "development"
-    } mode`,
-  );
-});
-
-process.on("SIGTERM", () => {
-  console.log("SIGTERM received, shutting down gracefully");
-  server.close(() => {
-    console.log("Process terminated");
+  logger.info('server.started', {
+    port: Number(PORT),
+    environment: process.env.NODE_ENV || 'development',
   });
 });
 
-process.on("SIGINT", () => {
-  console.log("SIGINT received, shutting down gracefully");
-  server.close(() => {
-    console.log("Process terminated");
+let shutdownStarted = false;
+
+const shutdown = (reason: string, exitCode = 0) => {
+  if (shutdownStarted) {
+    return;
+  }
+
+  shutdownStarted = true;
+  logger.info('server.shutdown.started', { reason, exitCode });
+
+  server.close((error) => {
+    if (error) {
+      logger.error('server.shutdown.failed', {
+        reason,
+        error: serializeError(error),
+      });
+      process.exit(1);
+      return;
+    }
+
+    logger.info('server.shutdown.completed', { reason, exitCode });
+    process.exit(exitCode);
   });
+
+  setTimeout(() => {
+    logger.error('server.shutdown.timeout', {
+      reason,
+      timeoutMs: 10000,
+    });
+    process.exit(1);
+  }, 10000).unref();
+};
+
+process.on('SIGTERM', () => {
+  shutdown('SIGTERM', 0);
+});
+
+process.on('SIGINT', () => {
+  shutdown('SIGINT', 0);
+});
+
+process.on('unhandledRejection', (reason) => {
+  logger.error('process.unhandledRejection', {
+    error:
+      reason instanceof Error
+        ? serializeError(reason)
+        : { message: 'Unhandled rejection', value: reason },
+  });
+  shutdown('UNHANDLED_REJECTION', 1);
+});
+
+process.on('uncaughtException', (error) => {
+  logger.error('process.uncaughtException', {
+    error: serializeError(error),
+  });
+  shutdown('UNCAUGHT_EXCEPTION', 1);
 });
