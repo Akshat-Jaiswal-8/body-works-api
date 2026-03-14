@@ -1,32 +1,25 @@
-import { db } from "../lib/db.js";
+import { db } from '../lib/db.js';
+import { logControllerError } from '../lib/logger.js';
 
 export const getExercises = async (req, res) => {
   try {
     const limit = parseInt(req.query?.limit) || 10;
     const page = parseInt(req.query?.page) || 1;
     const offset = (page - 1) * limit;
-    const equipment = req.query?.equipment
-      ? decodeURIComponent(req.query.equipment)
-      : undefined;
-    const targetMuscle = req.query?.target
-      ? decodeURIComponent(req.query.target)
-      : undefined;
-    const bodyPart = req.query?.bodyPart
-      ? decodeURIComponent(req.query.bodyPart)
-      : undefined;
-    const search = req.query?.search
-      ? decodeURIComponent(req.query.search)
-      : undefined;
+    const equipment = req.query?.equipment ? decodeURIComponent(req.query.equipment) : undefined;
+    const targetMuscle = req.query?.target ? decodeURIComponent(req.query.target) : undefined;
+    const bodyPart = req.query?.bodyPart ? decodeURIComponent(req.query.bodyPart) : undefined;
+    const search = req.query?.search ? decodeURIComponent(req.query.search) : undefined;
 
     if (offset < 0) {
       return res.status(400).send({
-        message: "Offset must be a non-negative integer.",
+        message: 'Offset must be a non-negative integer.',
       });
     }
 
     if (limit && (!Number.isInteger(limit) || limit <= 0)) {
       return res.status(400).send({
-        message: "Limit must be a positive integer.",
+        message: 'Limit must be a positive integer.',
       });
     }
 
@@ -37,43 +30,43 @@ export const getExercises = async (req, res) => {
         {
           name: {
             contains: search,
-            mode: "insensitive",
+            mode: 'insensitive',
           },
         },
         {
           title: {
             contains: search,
-            mode: "insensitive",
+            mode: 'insensitive',
           },
         },
         {
           target: {
             contains: search,
-            mode: "insensitive",
+            mode: 'insensitive',
           },
         },
         {
           muscle_worked: {
             contains: search,
-            mode: "insensitive",
+            mode: 'insensitive',
           },
         },
         {
           bodyPart: {
             contains: search,
-            mode: "insensitive",
+            mode: 'insensitive',
           },
         },
         {
           equipment: {
             contains: search,
-            mode: "insensitive",
+            mode: 'insensitive',
           },
         },
         {
           blog: {
             contains: search,
-            mode: "insensitive",
+            mode: 'insensitive',
           },
         },
         {
@@ -87,21 +80,21 @@ export const getExercises = async (req, res) => {
     if (equipment) {
       filter.equipment = {
         contains: equipment,
-        mode: "insensitive",
+        mode: 'insensitive',
       };
     }
 
     if (targetMuscle) {
       filter.target = {
         contains: targetMuscle,
-        mode: "insensitive",
+        mode: 'insensitive',
       };
     }
 
     if (bodyPart) {
       filter.bodyPart = {
         contains: bodyPart,
-        mode: "insensitive",
+        mode: 'insensitive',
       };
     }
 
@@ -132,12 +125,11 @@ export const getExercises = async (req, res) => {
       data: exercises,
     });
   } catch (error) {
-    console.error("Error fetching exercises:", error.message, {
+    logControllerError(res, 'exercise.list.failed', error, {
       query: req.query,
-      stack: error.stack,
     });
     res.status(500).send({
-      message: "Failed to fetch exercises. Please try again later.",
+      message: 'Failed to fetch exercises. Please try again later.',
     });
   }
 };
@@ -147,29 +139,28 @@ export const getExercise = async (req, res) => {
     const { id } = req.params;
 
     if (!id) {
-      return res.status(400).send({ message: "ExerciseId not found." });
+      return res.status(400).send({ message: 'ExerciseId not found.' });
     }
 
-    const paddedId = id.padStart(4, "0");
+    const paddedId = id.padStart(4, '0');
 
     const filteredExercise = await db.exercises.findFirst({
       where: { id_: paddedId },
     });
 
     if (!filteredExercise) {
-      return res.status(404).send({ message: "Exercise not found." });
+      return res.status(404).send({ message: 'Exercise not found.' });
     }
 
     return res.status(200).send({
       data: filteredExercise,
     });
   } catch (error) {
-    console.error("Error fetching exercise:", error.message, {
+    logControllerError(res, 'exercise.get.failed', error, {
       exerciseId: req.params.id,
-      stack: error.stack,
     });
     return res.status(500).send({
-      message: "Failed to fetch the exercise. Please try again later.",
+      message: 'Failed to fetch the exercise. Please try again later.',
     });
   }
 };

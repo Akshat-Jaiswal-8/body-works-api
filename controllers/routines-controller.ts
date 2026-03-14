@@ -1,4 +1,5 @@
-import { db } from "../lib/db.js";
+import { db } from '../lib/db.js';
+import { logControllerError } from '../lib/logger.js';
 
 export const getRoutines = async (req, res) => {
   try {
@@ -20,13 +21,13 @@ export const getRoutines = async (req, res) => {
 
     if (offset < 0) {
       return res.status(400).send({
-        message: "Offset must be a non-negative integer.",
+        message: 'Offset must be a non-negative integer.',
       });
     }
 
     if (limit && (!Number.isInteger(limit) || limit <= 0)) {
       return res.status(400).send({
-        message: "Limit must be a positive integer.",
+        message: 'Limit must be a positive integer.',
       });
     }
 
@@ -39,7 +40,7 @@ export const getRoutines = async (req, res) => {
             is: {
               routine_title: {
                 contains: search,
-                mode: "insensitive",
+                mode: 'insensitive',
               },
             },
           },
@@ -49,7 +50,7 @@ export const getRoutines = async (req, res) => {
             is: {
               routine_description: {
                 contains: search,
-                mode: "insensitive",
+                mode: 'insensitive',
               },
             },
           },
@@ -61,7 +62,7 @@ export const getRoutines = async (req, res) => {
                 is: {
                   Main_Goal: {
                     contains: search,
-                    mode: "insensitive",
+                    mode: 'insensitive',
                   },
                 },
               },
@@ -75,7 +76,7 @@ export const getRoutines = async (req, res) => {
                 is: {
                   Workout_Type: {
                     contains: search,
-                    mode: "insensitive",
+                    mode: 'insensitive',
                   },
                 },
               },
@@ -89,7 +90,7 @@ export const getRoutines = async (req, res) => {
                 is: {
                   Training_Level: {
                     contains: search,
-                    mode: "insensitive",
+                    mode: 'insensitive',
                   },
                 },
               },
@@ -103,7 +104,7 @@ export const getRoutines = async (req, res) => {
                 is: {
                   Program_Duration: {
                     contains: search,
-                    mode: "insensitive",
+                    mode: 'insensitive',
                   },
                 },
               },
@@ -117,7 +118,7 @@ export const getRoutines = async (req, res) => {
                 is: {
                   Days_Per_Week: {
                     contains: search,
-                    mode: "insensitive",
+                    mode: 'insensitive',
                   },
                 },
               },
@@ -131,7 +132,7 @@ export const getRoutines = async (req, res) => {
                 is: {
                   Equipment_Required: {
                     contains: search,
-                    mode: "insensitive",
+                    mode: 'insensitive',
                   },
                 },
               },
@@ -145,7 +146,7 @@ export const getRoutines = async (req, res) => {
                 is: {
                   Target_Gender: {
                     contains: search,
-                    mode: "insensitive",
+                    mode: 'insensitive',
                   },
                 },
               },
@@ -313,12 +314,11 @@ export const getRoutines = async (req, res) => {
       data: filteredRoutines,
     });
   } catch (error) {
-    console.error("Error fetching routines:", error.message, {
+    logControllerError(res, 'routines.list.failed', error, {
       query: req.query,
-      stack: error.stack,
     });
     res.status(500).send({
-      message: "Failed to fetch routines. Please try again later.",
+      message: 'Failed to fetch routines. Please try again later.',
     });
   }
 };
@@ -328,7 +328,7 @@ export const getRoutine = async (req, res) => {
     const { id } = req.params;
 
     if (!id) {
-      return res.status(400).send({ message: "RoutineId not provided." });
+      return res.status(400).send({ message: 'RoutineId not provided.' });
     }
 
     const filteredRoutine = await db.routines.findFirst({
@@ -336,16 +336,15 @@ export const getRoutine = async (req, res) => {
     });
 
     if (!filteredRoutine) {
-      return res.status(404).send({ message: "Routine not found." });
+      return res.status(404).send({ message: 'Routine not found.' });
     }
 
     return res.status(200).send({
       data: filteredRoutine,
     });
   } catch (error) {
-    console.error("Error fetching routine:", error.message, {
+    logControllerError(res, 'routines.get.failed', error, {
       routineId: req.params.id,
-      stack: error.stack,
     });
     return res.status(500).send({
       message: `Unable to get the routine with id: ${req.params.id}. Please try again later.`,
@@ -359,24 +358,24 @@ export const getFilteredRoutines = async (req, res) => {
 
     if (!filter) {
       return res.status(400).send({
-        message: "Filter parameter is required.",
+        message: 'Filter parameter is required.',
       });
     }
 
     const validFilters = [
-      "category",
-      "days_per_week",
-      "duration",
-      "equipment",
-      "gender",
-      "level",
-      "main_goal",
-      "workout_type",
+      'category',
+      'days_per_week',
+      'duration',
+      'equipment',
+      'gender',
+      'level',
+      'main_goal',
+      'workout_type',
     ];
 
     if (!validFilters.includes(filter)) {
       return res.status(400).send({
-        message: `Invalid filter. Valid filters are: ${validFilters.join(", ")}`,
+        message: `Invalid filter. Valid filters are: ${validFilters.join(', ')}`,
       });
     }
 
@@ -397,11 +396,9 @@ export const getFilteredRoutines = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error fetching routine categories:", error.message, {
-      stack: error.stack,
-    });
+    logControllerError(res, 'routines.filters.failed', error);
     return res.status(500).send({
-      message: "Unable to get routine categories. Please try again later.",
+      message: 'Unable to get routine categories. Please try again later.',
     });
   }
 };
