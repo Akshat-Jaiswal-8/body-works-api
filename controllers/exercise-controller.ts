@@ -30,7 +30,7 @@ export const getExercises = async (req, res) => {
       });
     }
 
-    const filter = {};
+    const filter: any = {};
 
     if (search) {
       filter.OR = [
@@ -105,7 +105,7 @@ export const getExercises = async (req, res) => {
       };
     }
 
-    const findOptions = {
+    const findOptions: any = {
       where: filter,
       skip: offset,
     };

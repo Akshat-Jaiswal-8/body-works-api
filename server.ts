@@ -7,11 +7,11 @@ import { rateLimit } from "express-rate-limit";
 import { fileURLToPath } from "url";
 import compression from "compression";
 import morgan from "morgan";
-import exerciseRoutes from "./routes/exerciseRoutes.js";
-import bodyPartsRoutes from "./routes/bodyPartsRoutes.js";
-import targetMusclesRoutes from "./routes/targetMusclesRoutes.js";
-import equipmentsRoutes from "./routes/equipmentsRoutes.js";
-import routinesRoutes from "./routes/routinesRoutes.js";
+import exerciseRoutes from "./routes/exercise-routes.js";
+import bodyPartsRoutes from "./routes/body-parts-routes.js";
+import targetMusclesRoutes from "./routes/target-muscles-routes.js";
+import equipmentsRoutes from "./routes/equipments-routes.js";
+import routinesRoutes from "./routes/routines-routes.js";
 
 dotenv.config();
 
@@ -55,7 +55,7 @@ app.use(
       includeSubDomains: true,
       preload: true,
     },
-  })
+  }),
 );
 
 app.use(
@@ -66,7 +66,7 @@ app.use(
         : true,
     credentials: false,
     optionsSuccessStatus: 200,
-  })
+  }),
 );
 
 app.use(express.json({ limit: "10mb" }));
@@ -93,7 +93,7 @@ app.use(
     setHeaders: (res, filePath) => {
       res.setHeader("Cache-Control", "public, max-age=86400");
     },
-  })
+  }),
 );
 
 app.use("/api/v1/exercises", generalLimiter, exerciseRoutes);
@@ -152,7 +152,7 @@ const server = app.listen(PORT, () => {
   console.log(
     `Server running on port ${PORT} in ${
       process.env.NODE_ENV || "development"
-    } mode`
+    } mode`,
   );
 });
 

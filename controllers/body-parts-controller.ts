@@ -11,7 +11,7 @@ export const getBodyParts = async (req, res) => {
       });
     }
 
-    const findOptions = {
+    const findOptions: any = {
       skip: offset,
     };
 
