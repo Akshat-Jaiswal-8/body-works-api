@@ -6,17 +6,29 @@ const globalForPrisma = globalThis as typeof globalThis & {
   prisma?: PrismaClient;
 };
 
-const prismaLogConfig =
-  process.env.LOG_PRISMA_QUERIES === 'true'
-    ? [
-        { emit: 'event' as const, level: 'query' as const },
-        { emit: 'event' as const, level: 'warn' as const },
-        { emit: 'event' as const, level: 'error' as const },
-      ]
-    : [
-        { emit: 'event' as const, level: 'warn' as const },
-        { emit: 'event' as const, level: 'error' as const },
-      ];
+const shouldLogPrismaQueries =
+  process.env.LOG_PRISMA_QUERIES === 'true' && process.env.NODE_ENV !== 'production';
+
+const MAX_PRISMA_QUERY_LOG_LENGTH = 2000;
+
+const truncateForLog = (value: string, maxLength: number) => {
+  if (value.length <= maxLength) {
+    return value;
+  }
+
+  return value.slice(0, maxLength) + '...[truncated]';
+};
+
+const prismaLogConfig = shouldLogPrismaQueries
+  ? [
+      { emit: 'event' as const, level: 'query' as const },
+      { emit: 'event' as const, level: 'warn' as const },
+      { emit: 'event' as const, level: 'error' as const },
+    ]
+  : [
+      { emit: 'event' as const, level: 'warn' as const },
+      { emit: 'event' as const, level: 'error' as const },
+    ];
 
 const createPrismaClient = () => {
   const prisma = new PrismaClient({
@@ -37,13 +49,13 @@ const createPrismaClient = () => {
     });
   });
 
-  if (process.env.LOG_PRISMA_QUERIES === 'true') {
+  if (shouldLogPrismaQueries) {
     prisma.$on('query', (event) => {
       logger.debug('prisma.query', {
         target: event.target,
         durationMs: event.duration,
-        query: event.query,
-        params: event.params,
+        query: truncateForLog(event.query ?? '', MAX_PRISMA_QUERY_LOG_LENGTH),
+        params: '[REDACTED]',
       });
     });
   }
