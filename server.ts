@@ -8,6 +8,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { logger, requestLoggerMiddleware, serializeError } from './lib/logger.js';
+import loginRoutes from './routes/auth-routes.js';
 import bodyPartsRoutes from './routes/body-parts-routes.js';
 import equipmentsRoutes from './routes/equipments-routes.js';
 import exerciseRoutes from './routes/exercise-routes.js';
@@ -92,6 +93,7 @@ app.use(
   }),
 );
 
+app.use('/api/v1/auth', generalLimiter, loginRoutes);
 app.use('/api/v1/exercises', generalLimiter, exerciseRoutes);
 app.use('/api/v1/bodyParts', generalLimiter, bodyPartsRoutes);
 app.use('/api/v1/targetMuscles', generalLimiter, targetMusclesRoutes);

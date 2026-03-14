@@ -1,5 +1,5 @@
-import { type User } from '@prisma/client';
-import { type Request, type Response } from 'express';
+import type { User } from '@prisma/client';
+import type { Request, Response } from 'express';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import z from 'zod';
 
@@ -96,9 +96,15 @@ export const registerUser = async (req: Request, res: Response) => {
       },
     });
 
-    return res.status(200).json({ user, message: 'user created successfully.' });
+    return res.status(200).json({
+      data: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      },
+      message: 'user created successfully.',
+    });
   } catch (error) {
-    console.error(error);
     res.status(500).json({
       success: false,
       message: 'Error registering the user.',
@@ -164,6 +170,7 @@ export const loginUser = async (req: Request, res: Response) => {
       name: user.name,
       email: user.email,
       accessToken,
+      refreshToken,
     });
   } catch (error) {
     console.error(error);
