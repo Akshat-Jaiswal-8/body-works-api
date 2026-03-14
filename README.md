@@ -3,6 +3,7 @@
 Welcome to the Body Works API! This API provides comprehensive information on exercises, body parts, target muscles, equipment, and routines. It is designed to help users find and utilize various fitness resources to improve their health and workout regimens.
 
 ## Base URL
+
 ### https://api.bodyworks.akshatjaiswal.me/api/v1
 
 ## Endpoints :-
@@ -11,23 +12,26 @@ Welcome to the Body Works API! This API provides comprehensive information on ex
 
 - **Endpoint :** `/exercises`
 - **Method :** GET
-- **Params :** 
+- **Params :**
+
 ```
 page: 1
 limit: 10
-equipment: eg. 
+equipment: eg.
 bodypart: eg. waist
 targetMuscle: eg. abs
 search: anything related to exercise.
 ```
 
 - **API will look like this :**
+
 ```
 https://api.bodyworks.akshatjaiswal.me/exercises?limit=10&page=1&bodyPart=waist&equipment=body%20weight&targetMuscle=abs
 
 ```
 
-- **Response type :** 
+- **Response type :**
+
 ```
 Array of objects containing the following entries:
 
@@ -44,76 +48,84 @@ gifUrl: string;
 videos: string[];
 keywords: string[];
 ```
+
 - **Sample Response:**
+
 ```json
 {
-    "totalExercises": 220,
-    "totalPages": 220,
-    "data": [
-        {
-            "name": "3/4 sit-up",
-            "title": "3/4 Sit-Up",
-            "target": "abs",
-            "muscles worked": "- Rectus abdominis (six-pack muscles)\n- Hip flexors\n- Lower back muscles\n",
-            "bodyPart": "waist",
-            "equipment": "body weight",
-            "id": "0001",
-            "blog": "# 3/4 Sit-Up\n\n## Description\nThe 3/4 sit-up is an abdominal exercise that targets the rectus abdominis, commonly known as the \"six-pack\" muscles. It also engages the hip flexors and the muscles of the lower back. This exercise aims to strengthen the core muscles and improve overall abdominal stability.\n\n## Instructions\n1. Start by lying on your back on a mat or a flat surface with your knees bent and feet flat on the ground. Keep your feet hip-width apart.\n2. Place your hands lightly behind your head, supporting your neck with your fingertips. Avoid pulling on your neck during the exercise.\n3. Engage your abdominal muscles by drawing your belly button in towards your spine.\n4. Slowly lift your upper body off the ground, curling your shoulders towards your knees. Keep your lower back in contact with the ground throughout the movement.\n5. Stop when your torso is at a 45-degree angle from the ground, or when you feel a strong contraction in your abdominal muscles. This position is often referred to as the \"three-quarter\" point.\n6. Hold this position briefly, then slowly lower your upper body back down to the starting position, maintaining control and engaging your core.\n7. Repeat the movement for the desired number of repetitions.\n\n## Variations\n- Beginner Variation: If you are a beginner or have difficulty performing the full 3/4 sit-up, you can start by lifting your upper body only a few inches off the ground and gradually increase the range of motion as your core strength improves.\n- Advanced Variation: To make the exercise more challenging, you can hold a weight plate or a medicine ball against your chest while performing the 3/4 sit-up.\n\n## Muscles Worked\n- Rectus abdominis (six-pack muscles)\n- Hip flexors\n- Lower back muscles\n\n## Common Mistakes\n- Using momentum: Avoid using momentum to lift your upper body. Focus on controlled movements and use your abdominal muscles to initiate the movement.\n- Neck strain: Do not pull on your neck with your hands during the exercise. Use your fingertips for light support only.\n- Arching the lower back: Keep your lower back in contact with the ground throughout the movement to maintain proper form and prevent strain on the lower back.\n\n## Safety Precautions\n- Consult with a healthcare professional before starting any new exercise program, especially if you have a history of back or neck problems.\n- If you experience any pain or discomfort during the exercise, stop immediately and seek medical advice.\n- Engage your core muscles and maintain proper form throughout the exercise to minimize the risk of injury.\n- If you have difficulty maintaining stability or if you have a weak core, it is recommended to perform this exercise under the supervision of a qualified fitness professional.",
-            "images": [
-                "api.bodyworks.akshatjaiswal.me/assets/images/0001/1.jpeg",
-                "api.bodyworks.akshatjaiswal.me/assets/images/0001/2.jpeg",
-                "api.bodyworks.akshatjaiswal.me/assets/images/0001/3.jpeg",
-                "api.bodyworks.akshatjaiswal.me/assets/images/0001/4.jpeg",
-                "api.bodyworks.akshatjaiswal.me/assets/images/0001/5.jpeg"
-            ],
-            "gifUrl": "api.bodyworks.akshatjaiswal.me/assets/gifs/0001.gif",
-            "videos": [
-                "https://www.youtube.com/watch?v=-B9lsTWsJCo",
-                "https://www.youtube.com/watch?v=FXalPpHfkZk",
-                "https://www.youtube.com/watch?v=nxFgeTpBP6s",
-                "https://www.youtube.com/watch?v=A7Y2-G4zOUA",
-                "https://www.youtube.com/watch?v=Mm6spB-hms8"
-            ],
-            "keywords": [
-                "3/4 sit-up",
-                "Abdominal exercise",
-                "Rectus abdominis",
-                "Six-pack muscles",
-                "Hip flexors",
-                "Lower back muscles",
-                "Core strength",
-                "Abdominal stability",
-                "Exercise instructions",
-                "Variations",
-                "Beginner variation",
-                "Advanced variation",
-                "Muscles worked",
-                "Common mistakes",
-                "Safety precautions",
-                "Healthcare professional",
-                "Back and neck problems",
-                "Pain and discomfort",
-                "Proper form",
-                "Qualified fitness professional"
-            ]
-        }
-    ]
+  "totalExercises": 220,
+  "totalPages": 220,
+  "data": [
+    {
+      "name": "3/4 sit-up",
+      "title": "3/4 Sit-Up",
+      "target": "abs",
+      "muscles worked": "- Rectus abdominis (six-pack muscles)\n- Hip flexors\n- Lower back muscles\n",
+      "bodyPart": "waist",
+      "equipment": "body weight",
+      "id": "0001",
+      "blog": "# 3/4 Sit-Up\n\n## Description\nThe 3/4 sit-up is an abdominal exercise that targets the rectus abdominis, commonly known as the \"six-pack\" muscles. It also engages the hip flexors and the muscles of the lower back. This exercise aims to strengthen the core muscles and improve overall abdominal stability.\n\n## Instructions\n1. Start by lying on your back on a mat or a flat surface with your knees bent and feet flat on the ground. Keep your feet hip-width apart.\n2. Place your hands lightly behind your head, supporting your neck with your fingertips. Avoid pulling on your neck during the exercise.\n3. Engage your abdominal muscles by drawing your belly button in towards your spine.\n4. Slowly lift your upper body off the ground, curling your shoulders towards your knees. Keep your lower back in contact with the ground throughout the movement.\n5. Stop when your torso is at a 45-degree angle from the ground, or when you feel a strong contraction in your abdominal muscles. This position is often referred to as the \"three-quarter\" point.\n6. Hold this position briefly, then slowly lower your upper body back down to the starting position, maintaining control and engaging your core.\n7. Repeat the movement for the desired number of repetitions.\n\n## Variations\n- Beginner Variation: If you are a beginner or have difficulty performing the full 3/4 sit-up, you can start by lifting your upper body only a few inches off the ground and gradually increase the range of motion as your core strength improves.\n- Advanced Variation: To make the exercise more challenging, you can hold a weight plate or a medicine ball against your chest while performing the 3/4 sit-up.\n\n## Muscles Worked\n- Rectus abdominis (six-pack muscles)\n- Hip flexors\n- Lower back muscles\n\n## Common Mistakes\n- Using momentum: Avoid using momentum to lift your upper body. Focus on controlled movements and use your abdominal muscles to initiate the movement.\n- Neck strain: Do not pull on your neck with your hands during the exercise. Use your fingertips for light support only.\n- Arching the lower back: Keep your lower back in contact with the ground throughout the movement to maintain proper form and prevent strain on the lower back.\n\n## Safety Precautions\n- Consult with a healthcare professional before starting any new exercise program, especially if you have a history of back or neck problems.\n- If you experience any pain or discomfort during the exercise, stop immediately and seek medical advice.\n- Engage your core muscles and maintain proper form throughout the exercise to minimize the risk of injury.\n- If you have difficulty maintaining stability or if you have a weak core, it is recommended to perform this exercise under the supervision of a qualified fitness professional.",
+      "images": [
+        "api.bodyworks.akshatjaiswal.me/assets/images/0001/1.jpeg",
+        "api.bodyworks.akshatjaiswal.me/assets/images/0001/2.jpeg",
+        "api.bodyworks.akshatjaiswal.me/assets/images/0001/3.jpeg",
+        "api.bodyworks.akshatjaiswal.me/assets/images/0001/4.jpeg",
+        "api.bodyworks.akshatjaiswal.me/assets/images/0001/5.jpeg"
+      ],
+      "gifUrl": "api.bodyworks.akshatjaiswal.me/assets/gifs/0001.gif",
+      "videos": [
+        "https://www.youtube.com/watch?v=-B9lsTWsJCo",
+        "https://www.youtube.com/watch?v=FXalPpHfkZk",
+        "https://www.youtube.com/watch?v=nxFgeTpBP6s",
+        "https://www.youtube.com/watch?v=A7Y2-G4zOUA",
+        "https://www.youtube.com/watch?v=Mm6spB-hms8"
+      ],
+      "keywords": [
+        "3/4 sit-up",
+        "Abdominal exercise",
+        "Rectus abdominis",
+        "Six-pack muscles",
+        "Hip flexors",
+        "Lower back muscles",
+        "Core strength",
+        "Abdominal stability",
+        "Exercise instructions",
+        "Variations",
+        "Beginner variation",
+        "Advanced variation",
+        "Muscles worked",
+        "Common mistakes",
+        "Safety precautions",
+        "Healthcare professional",
+        "Back and neck problems",
+        "Pain and discomfort",
+        "Proper form",
+        "Qualified fitness professional"
+      ]
+    }
+  ]
 }
 ```
+
 ### 2. Get specific exercise Information
 
 - **Endpoint :** `/exercises/<id>`
 - **Description :** `Making a GET request on this link will return an exercise which corresponds to the id.`
 - **Method :** GET
 - **Params :**
+
 ```
 id : eg.0001
 ```
+
 - **API will look like this :**
+
 ```
 https://api.bodyworks.akshatjaiswal.me/exercises/0001
 ```
+
 - **Response type :**
+
 ```
 Response Type
 Object containing the following entries:
@@ -131,7 +143,9 @@ gifUrl: string;
 videos: string[];
 keywords: string[];
 ```
+
 - **Sample Response:**
+
 ```json
 {
   "data": {
@@ -183,23 +197,29 @@ keywords: string[];
   }
 }
 ```
+
 ### 3. Get Equipments Information
 
 - **Endpoint :** `/equipments`
 - **Description :** `Making a GET request on this link will return an array of all the equipments that may be used to filter the data from the exercise api.`
 - **Method :** GET
 - **API will look like this :**
+
 ```
 https://api.bodyworks.akshatjaiswal.me/equipments
 ```
+
 - **Response type :**
+
 ```
 Array of objects containing the following entries:
 
 exerciseCount: number
 equipment: string
 ```
+
 - **Sample Response:**
+
 ```json
 {
   "totalEquipments": 28,
@@ -217,6 +237,7 @@ equipment: string
   ]
 }
 ```
+
 ### 4. Get Target Muscles Information
 
 - **Endpoint :** `/targetMuscles`
@@ -224,17 +245,22 @@ equipment: string
 `
 - **Method :** GET
 - **API will look like this :**
+
 ```
 https://api.bodyworks.akshatjaiswal.me/targetMuscles
 ```
+
 - **Response type :**
+
 ```
 Array of objects containing the following entries:
 
 exerciseCount: number
 equipment: string
 ```
+
 - **Sample Response:**
+
 ```json
 {
   "totalTargetMuscles": 19,
@@ -252,23 +278,29 @@ equipment: string
   ]
 }
 ```
+
 ### 5. Get Body Parts Information
 
 - **Endpoint :** `/bodyParts`
 - **Description :** `Making a GET request on this link will return an array of all the body parts that may be used to filter the data from the exercise api.`
 - **Method :** GET
 - **API will look like this :**
+
 ```
 https://api.bodyworks.akshatjaiswal.me/bodyParts
 ```
+
 - **Response type :**
+
 ```
 Array of objects containing the following entries:
 
 exerciseCount: number
 equipment: string
 ```
+
 - **Sample Response:**
+
 ```json
 {
   "totalBodyParts": 10,
@@ -291,12 +323,14 @@ equipment: string
   ]
 }
 ```
+
 ### 6. Get Routines Information
 
 - **Endpoint :** `/routines`
 - **Description :** `Making a GET request on this link will return an array of all the routines which match the assigned filters.`
 - **Method :** GET
 - **Params :**
+
 ```
 limit : 10
 page : 1
@@ -313,12 +347,14 @@ search : eg.anything related to routine
 ```
 
 - **API will look like this :**
+
 ```
 https://api.bodyworks.akshatjaiswal.me/routines?limit=10&page=1
 
 ```
 
 - **Response type :**
+
 ```
 Array of objects containing the following entries:
 
@@ -328,11 +364,11 @@ routine: {
   routine_description: string;
   routine_imageUrl: string;
   workout_summary: {
-     Main Goal: string; 
+     Main Goal: string;
      Workout Type: string;
      Training Level: string;
      Program Duration: string;
-     Days Per Week: string; 
+     Days Per Week: string;
      Time Per Workout: string;
      Equipment Required: string;
      Target Gender": string;
@@ -343,20 +379,16 @@ workout_plan: {
 }[];
 id : number;
 ```
+
 - **Sample Response:**
+
 ```json
 {
   "totalRoutines": 604,
   "totalPages": 302,
   "finalData": [
     {
-      "category": [
-        "Workouts For Men",
-        "Muscle Building",
-        "Full Body",
-        "Bodyweight",
-        "At Home"
-      ],
+      "category": ["Workouts For Men", "Muscle Building", "Full Body", "Bodyweight", "At Home"],
       "routine": {
         "routine_title": "Body Like A God: A Complete Bodyweight Muscle Building Plan",
         "routine_description": "No equipment or gym? No problem. Build muscle at home with this classic bodyweight training system. This is a flexible training system that focuses on the use of exercise complexes.",
@@ -385,10 +417,7 @@ id : number;
       "id": 1
     },
     {
-      "category": [
-        "Workouts For Men",
-        "Muscle Building"
-      ],
+      "category": ["Workouts For Men", "Muscle Building"],
       "routine": {
         "routine_title": "“No Juice” Advanced Bodybuilding Workout Routine",
         "routine_description": "Avoid plateauing with the \"No Juice\" routine, which manipulates intensity, frequency, and volume to help you continue progressing in the gym.",
@@ -443,20 +472,26 @@ id : number;
   ]
 }
 ```
+
 ### 7. Get specific routine Information
 
 - **Endpoint :** `/routines/<id>`
 - **Description :** `Making a GET request on this link will return an routine which corresponds to the id.`
 - **Method :** GET
 - **Params :**
+
 ```
 id : eg.1
 ```
+
 - **API will look like this :**
+
 ```
 https://api.bodyworks.akshatjaiswal.me/routines/1
 ```
+
 - **Response type :**
+
 ```
 category: string[];
 routine: {
@@ -464,11 +499,11 @@ routine: {
   routine_description: string;
   routine_imageUrl: string;
   workout_summary: {
-     Main Goal: string; 
+     Main Goal: string;
      Workout Type: string;
      Training Level: string;
      Program Duration: string;
-     Days Per Week: string; 
+     Days Per Week: string;
      Time Per Workout: string;
      Equipment Required: string;
      Target Gender": string;
@@ -479,41 +514,37 @@ workout_plan: {
 }[];
 id : number;
 ```
+
 - **Sample Response:**
+
 ```json
 {
-    "category": [
-        "Workouts For Men",
-        "Muscle Building",
-        "Full Body",
-        "Bodyweight",
-        "At Home"
-    ],
-    "routine": {
-        "routine_title": "Body Like A God: A Complete Bodyweight Muscle Building Plan",
-        "routine_description": "No equipment or gym? No problem. Build muscle at home with this classic bodyweight training system. This is a flexible training system that focuses on the use of exercise complexes.",
-        "routine_imageUrl": "localhost:8000/assets/routine/1.webp",
-        "workout_summary": {
-            "Main Goal": "Build Muscle",
-            "Workout Type": "Full Body",
-            "Training Level": "Beginner",
-            "Program Duration": "4 weeks",
-            "Days Per Week": "4",
-            "Time Per Workout": "30-60 minutes",
-            "Equipment Required": "Bodyweight",
-            "Target Gender": "Male & Female"
-        },
-        "workout_plan": [
-            {
-                "heading": "Complex 1",
-                "day_plan": "<table>\n<tbody>\n<tr>\n<th> Exercise</th>\n<th> Sets</th>\n<th> Reps</th>\n</tr>\n<tr>\n<td colspan=\"4\"> Complex 1</td>\n</tr>\n<tr>\n<td> Push Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Medium-Grip Pull Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Handstand or Jackknife Push Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Diamond Push Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Inverted Rack Curl Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td colspan=\"4\"> Complex 2</td>\n</tr>\n<tr>\n<td> Single-Leg Calf Raise</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Jump Squat</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Walking Lunge</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Hanging Leg Raise</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Short All-Out Sprint Outdoors or on Treadmill</td>\n<td> 2-5</td>\n<td> Distance &amp; Duration varies according to fitness level &amp; experience.</td>\n</tr>\n</tbody>\n</table>"
-            },
-            {
-                "heading": "Complex 2",
-                "day_plan": "<table>\n<tbody>\n<tr>\n<th> Exercise</th>\n<th> Sets</th>\n<th> Reps</th>\n</tr>\n<tr>\n<td colspan=\"4\"> Complex 1</td>\n</tr>\n<tr>\n<td> Feet Elevated Push Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Wide Grip Inverted Row</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Rack Triceps Press or Parallel Bar Dips</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Shoulder Width Reverse Grip Pull Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Floor Crunch or Planks</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td colspan=\"4\"> Complex 2</td>\n</tr>\n<tr>\n<td> Box Jump or Jump Squat</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Bulgarian Split Squat</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Reverse Lunge</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Bench Step Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Short All-Out Sprint Outdoors or on Treadmill</td>\n<td> 2-5</td>\n<td> Distance &amp; Duration varies according to fitness level &amp; experience.</td>\n</tr>\n</tbody>\n</table>"
-            }
-        ]
+  "category": ["Workouts For Men", "Muscle Building", "Full Body", "Bodyweight", "At Home"],
+  "routine": {
+    "routine_title": "Body Like A God: A Complete Bodyweight Muscle Building Plan",
+    "routine_description": "No equipment or gym? No problem. Build muscle at home with this classic bodyweight training system. This is a flexible training system that focuses on the use of exercise complexes.",
+    "routine_imageUrl": "localhost:8000/assets/routine/1.webp",
+    "workout_summary": {
+      "Main Goal": "Build Muscle",
+      "Workout Type": "Full Body",
+      "Training Level": "Beginner",
+      "Program Duration": "4 weeks",
+      "Days Per Week": "4",
+      "Time Per Workout": "30-60 minutes",
+      "Equipment Required": "Bodyweight",
+      "Target Gender": "Male & Female"
     },
-    "id": 1
+    "workout_plan": [
+      {
+        "heading": "Complex 1",
+        "day_plan": "<table>\n<tbody>\n<tr>\n<th> Exercise</th>\n<th> Sets</th>\n<th> Reps</th>\n</tr>\n<tr>\n<td colspan=\"4\"> Complex 1</td>\n</tr>\n<tr>\n<td> Push Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Medium-Grip Pull Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Handstand or Jackknife Push Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Diamond Push Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Inverted Rack Curl Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td colspan=\"4\"> Complex 2</td>\n</tr>\n<tr>\n<td> Single-Leg Calf Raise</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Jump Squat</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Walking Lunge</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Hanging Leg Raise</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Short All-Out Sprint Outdoors or on Treadmill</td>\n<td> 2-5</td>\n<td> Distance &amp; Duration varies according to fitness level &amp; experience.</td>\n</tr>\n</tbody>\n</table>"
+      },
+      {
+        "heading": "Complex 2",
+        "day_plan": "<table>\n<tbody>\n<tr>\n<th> Exercise</th>\n<th> Sets</th>\n<th> Reps</th>\n</tr>\n<tr>\n<td colspan=\"4\"> Complex 1</td>\n</tr>\n<tr>\n<td> Feet Elevated Push Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Wide Grip Inverted Row</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Rack Triceps Press or Parallel Bar Dips</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Shoulder Width Reverse Grip Pull Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Floor Crunch or Planks</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td colspan=\"4\"> Complex 2</td>\n</tr>\n<tr>\n<td> Box Jump or Jump Squat</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Bulgarian Split Squat</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Reverse Lunge</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Bench Step Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Short All-Out Sprint Outdoors or on Treadmill</td>\n<td> 2-5</td>\n<td> Distance &amp; Duration varies according to fitness level &amp; experience.</td>\n</tr>\n</tbody>\n</table>"
+      }
+    ]
+  },
+  "id": 1
 }
 ```

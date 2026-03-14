@@ -1,11 +1,9 @@
-import express from "express";
-import {
-  getExercise,
-  getExercises,
-} from "../controllers/exercise-controller.js";
+import express from 'express';
+
+import { getExercise, getExercises } from '../controllers/exercise-controller.js';
 
 const router = express.Router();
 
-router.get("/", getExercises);
-router.get("/:id", getExercise);
+router.get('/', getExercises);
+router.get('/:id', getExercise);
 export default router;

@@ -13,11 +13,6 @@
     "resolveJsonModule": true,
     "sourceMap": true
   },
-  "include": [
-    "server.ts",
-    "controllers/**/*.ts",
-    "routes/**/*.ts",
-    "lib/**/*.ts"
-  ],
+  "include": ["server.ts", "controllers/**/*.ts", "routes/**/*.ts", "lib/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

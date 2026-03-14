@@ -1,13 +1,14 @@
-import express from "express";
+import express from 'express';
+
 import {
+  getFilteredRoutines,
   getRoutine,
   getRoutines,
-  getFilteredRoutines,
-} from "../controllers/routines-controller.js";
+} from '../controllers/routines-controller.js';
 
 const router = express.Router();
 
-router.get("/", getRoutines);
-router.get("/filters", getFilteredRoutines);
-router.get("/:id", getRoutine);
+router.get('/', getRoutines);
+router.get('/filters', getFilteredRoutines);
+router.get('/:id', getRoutine);
 export default router;
