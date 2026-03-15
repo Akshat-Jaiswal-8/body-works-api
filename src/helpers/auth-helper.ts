@@ -15,14 +15,14 @@ export const comparePassword = async (password: string, hashedPassword: string) 
   return bcrypt.compare(password, hashedPassword);
 };
 
-export const generateAccessToken = (user: User) => {
-  return jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: '3d',
+export const generateAccessToken = (id: string) => {
+  return jwt.sign({ id }, process.env.ACCESS_TOKEN_SECRET, {
+    expiresIn: '3h',
   });
 };
 
-export const generateRefreshToken = (user: User) => {
-  return jwt.sign({ id: user.id }, process.env.REFRESH_TOKEN_SECRET, {
-    expiresIn: '15d',
+export const generateRefreshToken = (id: string) => {
+  return jwt.sign({ id }, process.env.REFRESH_TOKEN_SECRET, {
+    expiresIn: '10d',
   });
 };

@@ -1,5 +1,6 @@
 import type { User } from '@prisma/client';
 import type { Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import z from 'zod';
 
@@ -10,6 +11,7 @@ import {
   hashPassword,
 } from '../helpers/auth-helper.js';
 import { db } from '../lib/db.js';
+import { logControllerError } from '../lib/logger.js';
 
 interface IRegisterUserRequestBody {
   name: string;
@@ -155,8 +157,8 @@ export const loginUser = async (req: Request, res: Response) => {
       });
     }
 
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
+    const accessToken = generateAccessToken(user.id);
+    const refreshToken = generateRefreshToken(user.id);
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
@@ -179,5 +181,34 @@ export const loginUser = async (req: Request, res: Response) => {
       message: 'Error logging in the user.',
       error,
     });
+  }
+};
+
+export const accessTokenFromRefreshToken = (req: Request, res: Response) => {
+  const refreshToken = req.cookies['refreshToken'];
+  if (!refreshToken) {
+    return res.status(401).json({
+      error: 'Access Denied. No refresh token provided.',
+    });
+  }
+
+  try {
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!, (err, decoded) => {
+      if (err || typeof decoded !== 'object' || !decoded?.id) {
+        logControllerError(res, 'Token verification failed.', err ?? new Error('Invalid payload'));
+        return res.sendStatus(403);
+      }
+
+      const accessToken = generateAccessToken(decoded.id as string);
+
+      res.header('Authorization', accessToken).json({ id: decoded.id });
+    });
+  } catch (error) {
+    logControllerError(
+      res,
+      'There was a problem with token.',
+      error ?? new Error('Invalid payload'),
+    );
+    return res.sendStatus(403);
   }
 };
