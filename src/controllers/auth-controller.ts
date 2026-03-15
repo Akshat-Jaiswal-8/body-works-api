@@ -133,7 +133,7 @@ export const registerUser = async (req: Request, res: Response) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        token: accessToken,
+        accessToken,
       },
       message: 'user created successfully.',
     });
@@ -224,7 +224,7 @@ export const loginUser = async (req: Request, res: Response) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        token: accessToken,
+        accessToken,
       },
     });
   } catch (error) {
