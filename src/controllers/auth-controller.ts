@@ -10,6 +10,7 @@ import {
   generateAccessToken,
   generateRefreshToken,
   hashPassword,
+  hashRefreshToken,
 } from '../helpers/auth-helper.js';
 import { db } from '../lib/db.js';
 import { logControllerError, serializeError } from '../lib/logger.js';
@@ -21,7 +22,7 @@ interface IRegisterUserRequestBody {
   password: string;
 }
 
-const refreshCookiePath = '/api/v1/auth/refresh-token';
+const refreshCookiePath = '/api/v1/auth';
 
 const userSchema = z.object({
   name: z
@@ -120,7 +121,7 @@ export const registerUser = async (req: Request, res: Response) => {
 
     await db.refreshToken.create({
       data: {
-        token: refreshToken,
+        token: hashRefreshToken(refreshToken),
         userId: user.id,
         expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
       },
@@ -212,7 +213,7 @@ export const registerUser = async (req: Request, res: Response) => {
 
     await db.refreshToken.create({
       data: {
-        token: refreshToken,
+        token: hashRefreshToken(refreshToken),
         userId: user.id,
         expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
       },
@@ -256,7 +257,9 @@ export const accessTokenFromRefreshToken = async (req: Request, res: Response) =
       });
     }
 
-    const storedToken = await db.refreshToken.findUnique({ where: { token: refreshToken } });
+    const storedToken = await db.refreshToken.findUnique({
+      where: { token: hashRefreshToken(refreshToken) },
+    });
 
     if (!storedToken) {
       // here we are revoking all the sessions if its a stolen token (as its been passed by jwt, that means it was correct, but its not in db so that means its expired, and someone might have stolen it, so revoking the session.)
@@ -269,7 +272,7 @@ export const accessTokenFromRefreshToken = async (req: Request, res: Response) =
       return res.status(403).json({ error: 'Refresh token has expired.' });
     }
 
-    await db.refreshToken.delete({ where: { token: refreshToken } });
+    await db.refreshToken.delete({ where: { token: hashRefreshToken(refreshToken) } });
 
     const userId = decoded.id as string;
     const accessToken = generateAccessToken(userId);
@@ -277,7 +280,7 @@ export const accessTokenFromRefreshToken = async (req: Request, res: Response) =
 
     await db.refreshToken.create({
       data: {
-        token: nextRefreshToken,
+        token: hashRefreshToken(nextRefreshToken),
         userId,
         expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
       },
@@ -296,8 +299,17 @@ export const accessTokenFromRefreshToken = async (req: Request, res: Response) =
 export const logoutUser = async (req: Request, res: Response) => {
   const refreshToken = req.cookies?.['refreshToken'];
 
-  if (refreshToken) {
-    await db.refreshToken.deleteMany({ where: { token: refreshToken } }).catch(() => {});
+  try {
+    if (refreshToken) {
+      await db.refreshToken.deleteMany({ where: { token: hashRefreshToken(refreshToken) } });
+    }
+  } catch (error) {
+    logControllerError(res, 'logout failed.', error as Error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to log out user.',
+      error: serializeError(error),
+    });
   }
 
   const { maxAge: _, ...clearOptions } = getRefreshCookieOptions();

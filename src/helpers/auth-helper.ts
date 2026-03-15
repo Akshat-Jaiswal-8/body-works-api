@@ -1,10 +1,14 @@
 import bcrypt from 'bcrypt';
-import { randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 import jwt from 'jsonwebtoken';
 
 export const hashPassword = async (password: string): Promise<string> => {
   const saltRounds = 10;
   return bcrypt.hash(password, saltRounds);
+};
+
+export const hashRefreshToken = (token: string): string => {
+  return createHash('sha256').update(token, 'utf8').digest('hex');
 };
 
 export const comparePassword = async (password: string, hashedPassword: string) => {
