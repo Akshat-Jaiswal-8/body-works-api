@@ -1,26 +1,27 @@
-import { User } from '@prisma/client';
 import type { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
-import { serializeError } from '../lib/logger.js';
+import { logControllerError } from '../lib/logger.js';
 
-export const authenticate = (req: Request & { id: string }, res: Response, next: NextFunction) => {
+export const authenticate = (
+  req: Request & { userId: string },
+  res: Response,
+  next: NextFunction,
+) => {
   const authHeader = req.headers.authorization;
+  const [scheme, token] = authHeader?.split(' ') ?? [];
 
-  const token = authHeader.split(' ')[1];
+  if (scheme !== 'Bearer' || !token) {
+    return res.status(401).json({ error: 'Access denied. No token provided.' });
+  }
 
-  if (!token) return res.sendStatus(401);
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!, (err, decoded) => {
+    if (err || typeof decoded !== 'object' || !decoded?.id) {
+      logControllerError(res, 'Token verification failed.', err ?? new Error('Invalid payload'));
+      return res.sendStatus(403);
+    }
 
-  const decode = jwt.verify(
-    token,
-    process.env.ACCESS_TOKEN_SECRET!,
-    (err: unknown, user: { id: string }) => {
-      if (err) {
-        serializeError(err);
-        return res.sendStatus(403);
-      }
-      req.id = user.id;
-      next();
-    },
-  );
+    req.userId = decoded.id as string;
+    next();
+  });
 };

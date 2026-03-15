@@ -2,12 +2,11 @@ import compression from 'compression';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
-import { rateLimit } from 'express-rate-limit';
 import helmet from 'helmet';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
-import { logger, requestLoggerMiddleware, serializeError } from './lib/logger.js';
+import { generalLimiter, strictLimiter } from './helpers/rate-limiter.js';
+import { logger, serializeError } from './lib/logger.js';
+import { requestLoggerMiddleware } from './middleware/logger-middleware.js';
 import loginRoutes from './routes/auth-routes.js';
 import bodyPartsRoutes from './routes/body-parts-routes.js';
 import equipmentsRoutes from './routes/equipments-routes.js';
@@ -16,26 +15,6 @@ import routinesRoutes from './routes/routines-routes.js';
 import targetMusclesRoutes from './routes/target-muscles-routes.js';
 
 dotenv.config();
-
-const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 20000,
-  message: {
-    error: 'Too many requests from this IP, please try again later.',
-  },
-  standardHeaders: 'draft-7',
-  legacyHeaders: false,
-});
-
-const strictLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 20,
-  message: {
-    error: 'Rate limit exceeded for this endpoint.',
-  },
-  standardHeaders: 'draft-7',
-  legacyHeaders: false,
-});
 
 const app = express();
 
@@ -79,20 +58,6 @@ app.use(compression());
 
 app.use(generalLimiter);
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-app.use(
-  '/assets',
-  express.static(path.join(__dirname, 'public/assets'), {
-    maxAge: '1d',
-    etag: false,
-    setHeaders: (res) => {
-      res.setHeader('Cache-Control', 'public, max-age=86400');
-    },
-  }),
-);
-
 app.use('/api/v1/auth', generalLimiter, loginRoutes);
 app.use('/api/v1/exercises', generalLimiter, exerciseRoutes);
 app.use('/api/v1/bodyParts', generalLimiter, bodyPartsRoutes);
@@ -100,14 +65,14 @@ app.use('/api/v1/targetMuscles', generalLimiter, targetMusclesRoutes);
 app.use('/api/v1/equipments', generalLimiter, equipmentsRoutes);
 app.use('/api/v1/routines', strictLimiter, routinesRoutes);
 
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.status(200).json({
     status: 'OK',
     timestamp: new Date().toISOString(),
   });
 });
 
-app.use('/', (req, res) => {
+app.use('/', (_req, res) => {
   res.set({
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
@@ -183,7 +148,6 @@ const shutdown = (reason: string, exitCode = 0) => {
         error: serializeError(error),
       });
       process.exit(1);
-      return;
     }
 
     logger.info('server.shutdown.completed', { reason, exitCode });
