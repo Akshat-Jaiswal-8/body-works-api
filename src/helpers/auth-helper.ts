@@ -1,12 +1,17 @@
 import bcrypt from 'bcrypt';
+import { randomUUID } from 'crypto';
 import jwt from 'jsonwebtoken';
+
+import { logger, serializeError } from '../lib/logger.js';
 
 export const hashPassword = async (password: string): Promise<string | undefined> => {
   try {
     const saltRounds = 10;
     return await bcrypt.hash(password, saltRounds);
   } catch (error) {
-    console.error(error);
+    logger.error('Failed to hash the password.', {
+      error: serializeError(error),
+    });
   }
 };
 
@@ -21,7 +26,7 @@ export const generateAccessToken = (id: string) => {
 };
 
 export const generateRefreshToken = (id: string) => {
-  return jwt.sign({ id }, process.env.REFRESH_TOKEN_SECRET, {
+  return jwt.sign({ id, jti: randomUUID() }, process.env.REFRESH_TOKEN_SECRET, {
     expiresIn: '10d',
   });
 };

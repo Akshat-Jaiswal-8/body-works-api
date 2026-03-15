@@ -89,6 +89,19 @@ model Favourite {
 }
 
 
+// ------------- REFRESH TOKENS --------------
+
+model RefreshToken {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+
 type RoutinesFilterCategory {
   imageUrl  String
   nRoutines Int

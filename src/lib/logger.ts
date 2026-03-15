@@ -15,8 +15,8 @@ const sensitiveKeys = new Set([
   'set-cookie',
   'password',
   'token',
-  'access_token',
-  'refresh_token',
+  'accessToken',
+  'refreshToken',
   'secret',
   'api_key',
 ]);

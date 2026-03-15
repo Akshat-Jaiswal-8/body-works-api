@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -e
 
-STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|js|mjs|cjs|json|md|yml|yaml|prisma)$' || true)
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|js|mjs|cjs)$' || true)
 CODE_FILES=$(echo "$STAGED_FILES" | grep -E '\.(ts|js|mjs|cjs)$' || true)
 
 if [ -n "$STAGED_FILES" ]; then

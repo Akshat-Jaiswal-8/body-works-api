@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import z from 'zod';
 
+import { MAX_DEVICE_SESSIONS, REFRESH_TOKEN_EXPIRES_MS } from '../constants/auth-constant.js';
 import {
   comparePassword,
   generateAccessToken,
@@ -68,7 +69,7 @@ const getRefreshCookieOptions = (): CookieOptions => {
     secure: isProduction,
     sameSite: isProduction ? 'none' : 'lax',
     path: refreshCookiePath,
-    maxAge: 10 * 24 * 60 * 60 * 1000,
+    maxAge: REFRESH_TOKEN_EXPIRES_MS,
   };
 };
 
@@ -176,6 +177,32 @@ export const loginUser = async (req: Request, res: Response) => {
     const accessToken = generateAccessToken(user.id);
     const refreshToken = generateRefreshToken(user.id);
 
+    await db.refreshToken.deleteMany({
+      where: {
+        userId: user.id,
+        expiresAt: { lte: new Date() },
+      },
+    });
+
+    const sessionCount = await db.refreshToken.count({ where: { userId: user.id } });
+
+    // if max device limit is used, delete the oldest session before adding a new one
+    if (sessionCount >= MAX_DEVICE_SESSIONS) {
+      const oldest = await db.refreshToken.findFirst({
+        where: { userId: user.id },
+        orderBy: { createdAt: 'asc' },
+      });
+      if (oldest) await db.refreshToken.delete({ where: { id: oldest.id } });
+    }
+
+    await db.refreshToken.create({
+      data: {
+        token: refreshToken,
+        userId: user.id,
+        expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
+      },
+    });
+
     res.cookie('refreshToken', refreshToken, getRefreshCookieOptions());
 
     return res.status(200).json({
@@ -185,7 +212,7 @@ export const loginUser = async (req: Request, res: Response) => {
       accessToken,
     });
   } catch (error) {
-    logControllerError(res, 'Error logging in the user.', error ?? new Error('Invalid payloadx'));
+    logControllerError(res, 'Error logging in the user.', error ?? new Error('Login error'));
     return res.status(500).json({
       success: false,
       message: 'Error logging in the user.',
@@ -194,7 +221,7 @@ export const loginUser = async (req: Request, res: Response) => {
   }
 };
 
-export const accessTokenFromRefreshToken = (req: Request, res: Response) => {
+export const accessTokenFromRefreshToken = async (req: Request, res: Response) => {
   const refreshToken = req.cookies?.['refreshToken'];
 
   if (!refreshToken) {
@@ -204,27 +231,56 @@ export const accessTokenFromRefreshToken = (req: Request, res: Response) => {
   }
 
   try {
-    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!, (err, decoded) => {
-      if (err || typeof decoded !== 'object' || !decoded?.id) {
-        logControllerError(res, 'Token verification failed.', err ?? new Error('Invalid payload'));
-        return res.sendStatus(403);
-      }
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!) as jwt.JwtPayload;
 
-      const userId = decoded.id as string;
-      const accessToken = generateAccessToken(userId);
-      const nextRefreshToken = generateRefreshToken(userId);
-
-      return res.cookie('refreshToken', nextRefreshToken, getRefreshCookieOptions()).json({
-        id: userId,
-        accessToken,
+    if (typeof decoded !== 'object' || !decoded?.id) {
+      return res.status(403).json({
+        error: 'Access denied.',
       });
+    }
+
+    const storedToken = await db.refreshToken.findUnique({ where: { token: refreshToken } });
+    if (!storedToken) {
+      return res.status(403).json({ error: 'Refresh token has been revoked.' });
+    }
+
+    if (storedToken.expiresAt <= new Date()) {
+      await db.refreshToken.deleteMany({ where: { token: refreshToken } });
+      return res.status(403).json({ error: 'Refresh token has expired.' });
+    }
+
+    await db.refreshToken.delete({ where: { token: refreshToken } });
+
+    const userId = decoded.id as string;
+    const accessToken = generateAccessToken(userId);
+    const nextRefreshToken = generateRefreshToken(userId);
+
+    await db.refreshToken.create({
+      data: {
+        token: nextRefreshToken,
+        userId,
+        expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
+      },
     });
+
+    return res
+      .cookie('refreshToken', nextRefreshToken, getRefreshCookieOptions())
+      .status(200)
+      .json({ id: userId, accessToken });
   } catch (error) {
-    logControllerError(
-      res,
-      'There was a problem with token.',
-      error ?? new Error('Invalid payload'),
-    );
+    logControllerError(res, 'Token verification failed.', error as Error);
     return res.sendStatus(403);
   }
+};
+
+export const logoutUser = async (req: Request, res: Response) => {
+  const refreshToken = req.cookies?.['refreshToken'];
+
+  if (refreshToken) {
+    await db.refreshToken.deleteMany({ where: { token: refreshToken } }).catch(() => {});
+  }
+
+  const { maxAge: _, ...clearOptions } = getRefreshCookieOptions();
+  res.clearCookie('refreshToken', clearOptions);
+  return res.status(200).json({ message: 'Logged out successfully.' });
 };
