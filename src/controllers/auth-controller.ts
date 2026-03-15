@@ -138,15 +138,16 @@ export const registerUser = async (req: Request, res: Response) => {
       message: 'user created successfully.',
     });
   } catch (error) {
-    res.status(500).json({
+    logControllerError(res, 'Error registering the user.', error ?? new Error('Register user error'));
+    return res.status(500).json({
       success: false,
       message: 'Error registering the user.',
-      error,
+      error: serializeError(error),
     });
   }
-};
+  };
 
-export const loginUser = async (req: Request, res: Response) => {
+  export const loginUser = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
