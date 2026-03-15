@@ -83,11 +83,11 @@ export const registerUser = async (req: Request, res: Response) => {
       });
     }
 
-    const old_user = await db.user.findUnique({
+    const oldUser = await db.user.findUnique({
       where: { email },
     });
 
-    if (old_user)
+    if (oldUser)
       return res.status(409).json({ message: 'User already exist. Please login again.' });
 
     const result = userSchema.safeParse(req.body);
@@ -115,11 +115,25 @@ export const registerUser = async (req: Request, res: Response) => {
       },
     });
 
-    return res.status(200).json({
+    const accessToken = generateAccessToken(user.id);
+    const refreshToken = generateRefreshToken(user.id);
+
+    await db.refreshToken.create({
+      data: {
+        token: refreshToken,
+        userId: user.id,
+        expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
+      },
+    });
+
+    res.cookie('refreshToken', refreshToken, getRefreshCookieOptions());
+
+    return res.status(201).json({
       data: {
         id: user.id,
         name: user.name,
         email: user.email,
+        token: accessToken,
       },
       message: 'user created successfully.',
     });
@@ -206,10 +220,12 @@ export const loginUser = async (req: Request, res: Response) => {
     res.cookie('refreshToken', refreshToken, getRefreshCookieOptions());
 
     return res.status(200).json({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      accessToken,
+      data: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        token: accessToken,
+      },
     });
   } catch (error) {
     logControllerError(res, 'Error logging in the user.', error ?? new Error('Login error'));
@@ -240,7 +256,10 @@ export const accessTokenFromRefreshToken = async (req: Request, res: Response) =
     }
 
     const storedToken = await db.refreshToken.findUnique({ where: { token: refreshToken } });
+
     if (!storedToken) {
+      // here we are revoking all the sessions if its a stolen token (as its been passed by jwt, that means it was correct, but its not in db so that means its expired, and someone might have stolen it, so revoking the session.)
+      await db.refreshToken.deleteMany({ where: { userId: decoded.id } });
       return res.status(403).json({ error: 'Refresh token has been revoked.' });
     }
 
