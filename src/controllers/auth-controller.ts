@@ -1,5 +1,5 @@
 import type { User } from '@prisma/client';
-import type { Request, Response } from 'express';
+import type { CookieOptions, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import z from 'zod';
@@ -11,7 +11,7 @@ import {
   hashPassword,
 } from '../helpers/auth-helper.js';
 import { db } from '../lib/db.js';
-import { logControllerError } from '../lib/logger.js';
+import { logControllerError, serializeError } from '../lib/logger.js';
 
 interface IRegisterUserRequestBody {
   name: string;
@@ -19,6 +19,8 @@ interface IRegisterUserRequestBody {
   phone_number: string;
   password: string;
 }
+
+const refreshCookiePath = '/api/v1/auth/refresh-token';
 
 const userSchema = z.object({
   name: z
@@ -55,6 +57,20 @@ const userSchema = z.object({
       abort: true,
     }),
 });
+
+const loginSchema = userSchema.pick({ email: true, password: true });
+
+const getRefreshCookieOptions = (): CookieOptions => {
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+    path: refreshCookiePath,
+    maxAge: 10 * 24 * 60 * 60 * 1000,
+  };
+};
 
 export const registerUser = async (req: Request, res: Response) => {
   try {
@@ -120,10 +136,10 @@ export const loginUser = async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      res.status(400).json({ message: 'All the input fields are required.' });
+      return res.status(400).json({ message: 'All the input fields are required.' });
     }
 
-    const result = userSchema.pick({ email, password }).safeParse(req.body);
+    const result = loginSchema.safeParse(req.body);
 
     if (!result.success) {
       return res.status(400).json({
@@ -151,7 +167,7 @@ export const loginUser = async (req: Request, res: Response) => {
     const matchPassword = await comparePassword(parsedSchema.password, user.passwordHash);
 
     if (!matchPassword) {
-      return res.status(200).json({
+      return res.status(401).json({
         success: false,
         message: 'Invalid Password.',
       });
@@ -160,32 +176,27 @@ export const loginUser = async (req: Request, res: Response) => {
     const accessToken = generateAccessToken(user.id);
     const refreshToken = generateRefreshToken(user.id);
 
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      path: '/refresh-token',
-    });
+    res.cookie('refreshToken', refreshToken, getRefreshCookieOptions());
 
-    res.status(200).json({
+    return res.status(200).json({
       id: user.id,
       name: user.name,
       email: user.email,
       accessToken,
-      refreshToken,
     });
   } catch (error) {
-    console.error(error);
+    logControllerError(res, 'Error logging in the user.', error ?? new Error('Invalid payloadx'));
     return res.status(500).json({
       success: false,
       message: 'Error logging in the user.',
-      error,
+      error: serializeError(error),
     });
   }
 };
 
 export const accessTokenFromRefreshToken = (req: Request, res: Response) => {
-  const refreshToken = req.cookies['refreshToken'];
+  const refreshToken = req.cookies?.['refreshToken'];
+
   if (!refreshToken) {
     return res.status(401).json({
       error: 'Access Denied. No refresh token provided.',
@@ -199,9 +210,14 @@ export const accessTokenFromRefreshToken = (req: Request, res: Response) => {
         return res.sendStatus(403);
       }
 
-      const accessToken = generateAccessToken(decoded.id as string);
+      const userId = decoded.id as string;
+      const accessToken = generateAccessToken(userId);
+      const nextRefreshToken = generateRefreshToken(userId);
 
-      res.header('Authorization', accessToken).json({ id: decoded.id });
+      return res.cookie('refreshToken', nextRefreshToken, getRefreshCookieOptions()).json({
+        id: userId,
+        accessToken,
+      });
     });
   } catch (error) {
     logControllerError(

@@ -1,4 +1,5 @@
 import compression from 'compression';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
@@ -17,6 +18,9 @@ import targetMusclesRoutes from './routes/target-muscles-routes.js';
 dotenv.config();
 
 const app = express();
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 app.set('trust proxy', 1);
 app.use(requestLoggerMiddleware);
@@ -42,17 +46,15 @@ app.use(
 
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === 'production'
-        ? process.env.ALLOWED_ORIGINS?.split(',') || false
-        : true,
-    credentials: false,
+    origin: process.env.NODE_ENV === 'production' ? allowedOrigins || false : true,
+    credentials: true,
     optionsSuccessStatus: 200,
   }),
 );
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cookieParser());
 
 app.use(compression());
 
