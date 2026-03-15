@@ -14,6 +14,7 @@ import equipmentsRoutes from './routes/equipments-routes.js';
 import exerciseRoutes from './routes/exercise-routes.js';
 import routinesRoutes from './routes/routines-routes.js';
 import targetMusclesRoutes from './routes/target-muscles-routes.js';
+import usersRoutes from './routes/users-routes.js';
 
 dotenv.config();
 
@@ -66,6 +67,7 @@ app.use('/api/v1/bodyParts', generalLimiter, bodyPartsRoutes);
 app.use('/api/v1/targetMuscles', generalLimiter, targetMusclesRoutes);
 app.use('/api/v1/equipments', generalLimiter, equipmentsRoutes);
 app.use('/api/v1/routines', strictLimiter, routinesRoutes);
+app.use('/api/v1/users', generalLimiter, usersRoutes);
 
 app.get('/health', (_req, res) => {
   res.status(200).json({
