@@ -139,16 +139,20 @@ export const registerUser = async (req: Request, res: Response) => {
       message: 'user created successfully.',
     });
   } catch (error) {
-    logControllerError(res, 'Error registering the user.', error ?? new Error('Register user error'));
+    logControllerError(
+      res,
+      'Error registering the user.',
+      error ?? new Error('Register user error'),
+    );
     return res.status(500).json({
       success: false,
       message: 'Error registering the user.',
       error: serializeError(error),
     });
   }
-  };
+};
 
-  export const loginUser = async (req: Request, res: Response) => {
+export const loginUser = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
@@ -268,7 +272,7 @@ export const accessTokenFromRefreshToken = async (req: Request, res: Response) =
     }
 
     if (storedToken.expiresAt <= new Date()) {
-      await db.refreshToken.deleteMany({ where: { token: refreshToken } });
+      await db.refreshToken.deleteMany({ where: { token: hashRefreshToken(refreshToken) } });
       return res.status(403).json({ error: 'Refresh token has expired.' });
     }
 
