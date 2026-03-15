@@ -298,12 +298,17 @@ export const accessTokenFromRefreshToken = async (req: Request, res: Response) =
 export const logoutUser = async (req: Request, res: Response) => {
   const refreshToken = req.cookies?.['refreshToken'];
 
-  if (refreshToken) {
-    await db.refreshToken
-      .deleteMany({ where: { token: hashRefreshToken(refreshToken) } })
-      .catch((error) => {
-        logControllerError(res, 'logout failed.', error);
-      });
+  try {
+    if (refreshToken) {
+      await db.refreshToken.deleteMany({ where: { token: hashRefreshToken(refreshToken) } });
+    }
+  } catch (error) {
+    logControllerError(res, 'logout failed.', error as Error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to log out user.',
+      error: serializeError(error),
+    });
   }
 
   const { maxAge: _, ...clearOptions } = getRefreshCookieOptions();
