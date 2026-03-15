@@ -1,12 +1,8 @@
-import type { Request, Response } from 'express';
+import type { AuthenticatedRequest, Response } from 'express';
 import z from 'zod';
 
 import { db } from '../lib/db.js';
 import { logControllerError } from '../lib/logger.js';
-
-interface AuthenticatedRequest extends Request {
-  userId: string;
-}
 
 const createBodyStatsSchema = z.object({
   weightKg: z.number().positive({ message: 'weightKg must be greater than 0.' }),
