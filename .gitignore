@@ -4,3 +4,5 @@ vcs.xml
 .env
 
 /generated/prisma
+dist
+.github

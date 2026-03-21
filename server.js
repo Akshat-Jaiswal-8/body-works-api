@@ -16,20 +16,10 @@ import routinesRoutes from "./routes/routinesRoutes.js";
 dotenv.config();
 
 const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
+  windowMs: 5 * 60 * 1000,
   limit: 20000,
   message: {
     error: "Too many requests from this IP, please try again later.",
-  },
-  standardHeaders: "draft-7",
-  legacyHeaders: false,
-});
-
-const strictLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 20,
-  message: {
-    error: "Rate limit exceeded for this endpoint.",
   },
   standardHeaders: "draft-7",
   legacyHeaders: false,
@@ -55,7 +45,7 @@ app.use(
       includeSubDomains: true,
       preload: true,
     },
-  })
+  }),
 );
 
 app.use(
@@ -66,7 +56,7 @@ app.use(
         : true,
     credentials: false,
     optionsSuccessStatus: 200,
-  })
+  }),
 );
 
 app.use(express.json({ limit: "10mb" }));
@@ -93,14 +83,14 @@ app.use(
     setHeaders: (res, filePath) => {
       res.setHeader("Cache-Control", "public, max-age=86400");
     },
-  })
+  }),
 );
 
 app.use("/api/v1/exercises", generalLimiter, exerciseRoutes);
 app.use("/api/v1/bodyParts", generalLimiter, bodyPartsRoutes);
 app.use("/api/v1/targetMuscles", generalLimiter, targetMusclesRoutes);
 app.use("/api/v1/equipments", generalLimiter, equipmentsRoutes);
-app.use("/api/v1/routines", strictLimiter, routinesRoutes);
+app.use("/api/v1/routines", generalLimiter, routinesRoutes);
 
 app.get("/health", (req, res) => {
   res.status(200).json({
@@ -152,7 +142,7 @@ const server = app.listen(PORT, () => {
   console.log(
     `Server running on port ${PORT} in ${
       process.env.NODE_ENV || "development"
-    } mode`
+    } mode`,
   );
 });
 
