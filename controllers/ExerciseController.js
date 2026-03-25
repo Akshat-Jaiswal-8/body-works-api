@@ -53,7 +53,7 @@ export const getExercises = async (req, res) => {
           },
         },
         {
-          muscle_worked: {
+          muscles_worked: {
             contains: search,
             mode: "insensitive",
           },
