@@ -1,5 +1,6 @@
 import { db } from '../lib/db.js';
 import { logControllerError } from '../lib/logger.js';
+import { mapWorkoutSummary } from '../lib/utils.js';
 
 export const getRoutines = async (req, res) => {
   try {
@@ -305,13 +306,21 @@ export const getRoutines = async (req, res) => {
 
     const totalPages = Math.ceil(totalRoutines / limit);
 
+    const data = filteredRoutines.map((routine) => ({
+      ...routine,
+      routine: {
+        ...routine.routine,
+        workout_summary: mapWorkoutSummary(routine.routine.workout_summary),
+      },
+    }));
+
     return res.status(200).send({
       totalRoutines,
       totalPages,
       count: filteredRoutines.length,
       offset: offset,
       limit: limit || null,
-      data: filteredRoutines,
+      data,
     });
   } catch (error) {
     logControllerError(res, 'routines.list.failed', error, {
@@ -340,7 +349,13 @@ export const getRoutine = async (req, res) => {
     }
 
     return res.status(200).send({
-      data: filteredRoutine,
+      data: {
+        ...filteredRoutine,
+        routine: {
+          ...filteredRoutine.routine,
+          workout_summary: mapWorkoutSummary(filteredRoutine.routine.workout_summary),
+        },
+      },
     });
   } catch (error) {
     logControllerError(res, 'routines.get.failed', error, {

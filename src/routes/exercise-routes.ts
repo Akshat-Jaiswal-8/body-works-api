@@ -5,6 +5,6 @@ import { authenticate } from '../middleware/auth-middleware.js';
 
 const router = express.Router();
 
-router.get('/', authenticate, getExercises);
+router.get('/', getExercises);
 router.get('/:id', getExercise);
 export default router;
