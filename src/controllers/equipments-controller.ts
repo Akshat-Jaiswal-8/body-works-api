@@ -1,4 +1,5 @@
-import { db } from "../lib/db.js";
+import { db } from '../lib/db.js';
+import { logControllerError } from '../lib/logger.js';
 
 export const getEquipments = async (req, res) => {
   try {
@@ -7,11 +8,11 @@ export const getEquipments = async (req, res) => {
 
     if (offset < 0) {
       return res.status(400).send({
-        message: "Offset must be a non-negative integer.",
+        message: 'Offset must be a non-negative integer.',
       });
     }
 
-    const findOptions = {
+    const findOptions: any = {
       skip: offset,
     };
 
@@ -32,12 +33,11 @@ export const getEquipments = async (req, res) => {
       data: equipments,
     });
   } catch (error) {
-    console.error("Error fetching equipments:", error.message, {
+    logControllerError(res, 'equipments.list.failed', error, {
       query: req.query,
-      stack: error.stack,
     });
     res.status(500).send({
-      message: "Failed to fetch equipments. Please try again later.",
+      message: 'Failed to fetch equipments. Please try again later.',
     });
   }
 };

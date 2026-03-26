@@ -1,4 +1,5 @@
-import { db } from "../lib/db.js";
+import { db } from '../lib/db.js';
+import { logControllerError } from '../lib/logger.js';
 
 export const getBodyParts = async (req, res) => {
   try {
@@ -7,11 +8,11 @@ export const getBodyParts = async (req, res) => {
 
     if (offset < 0) {
       return res.status(400).send({
-        message: "Offset must be a non-negative integer.",
+        message: 'Offset must be a non-negative integer.',
       });
     }
 
-    const findOptions = {
+    const findOptions: any = {
       skip: offset,
     };
 
@@ -32,12 +33,11 @@ export const getBodyParts = async (req, res) => {
       data: bodyParts,
     });
   } catch (error) {
-    console.error("Error fetching body parts:", error.message, {
+    logControllerError(res, 'body-parts.list.failed', error, {
       query: req.query,
-      stack: error.stack,
     });
     res.status(500).send({
-      message: "Failed to fetch body parts. Please try again later.",
+      message: 'Failed to fetch body parts. Please try again later.',
     });
   }
 };

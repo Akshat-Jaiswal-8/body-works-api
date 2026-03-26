@@ -1,0 +1,10 @@
+node_modules
+dist
+coverage
+.pnp.js
+*.tfstate
+*.tfstate.backup
+.idea
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
