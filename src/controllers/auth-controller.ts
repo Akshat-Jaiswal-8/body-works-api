@@ -266,9 +266,10 @@ export const accessTokenFromRefreshToken = async (req: Request, res: Response) =
     });
 
     if (!storedToken) {
-      // here we are revoking all the sessions if its a stolen token (as its been passed by jwt, that means it was correct, but its not in db so that means its expired, and someone might have stolen it, so revoking the session.)
-      await db.refreshToken.deleteMany({ where: { userId: decoded.id } });
-      return res.status(403).json({ error: 'Refresh token has been revoked.' });
+      // Token was not found in the database. This can happen due to legitimate rotation or logout,
+      // so we treat it as an invalid/unknown token and simply deny the request without revoking
+      // all of the user's other sessions to avoid race-condition induced logouts.
+      return res.status(403).json({ error: 'Invalid or unknown refresh token.' });
     }
 
     if (storedToken.expiresAt <= new Date()) {
