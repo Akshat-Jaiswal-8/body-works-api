@@ -293,7 +293,7 @@ export const accessTokenFromRefreshToken = async (req: Request, res: Response) =
     return res
       .cookie('refreshToken', nextRefreshToken, getRefreshCookieOptions())
       .status(200)
-      .json({ id: userId, accessToken });
+      .json({ data: { id: userId, accessToken } });
   } catch (error) {
     logControllerError(res, 'Token verification failed.', error as Error);
     return res.sendStatus(403);
