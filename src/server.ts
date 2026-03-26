@@ -105,6 +105,8 @@ app.use((err, req, res, _next) => {
         ? err.statusCode
         : 500;
 
+  res.locals.requestFailed = true;
+
   requestLogger.error('request.failed', {
     method: req.method,
     path: req.originalUrl,
