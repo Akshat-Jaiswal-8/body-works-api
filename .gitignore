@@ -5,3 +5,5 @@ vcs.xml
 .github
 /generated/prisma
 dist
+.DS_Store
+data
