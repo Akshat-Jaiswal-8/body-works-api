@@ -1,10 +1,14 @@
+import { relations } from 'drizzle-orm';
 import {
   index,
   integer,
   jsonb,
+  pgEnum,
   pgTable,
   primaryKey,
+  real,
   text,
+  timestamp,
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
@@ -182,9 +186,9 @@ export const routines = pgTable(
   'routines',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    externalRoutineId: integer('external_routine_id').unique(), // nullable for custom routines
+    externalRoutineId: integer('external_routine_id').unique(),
 
-    source: text('source').notNull().default('imported'), // imported | custom
+    source: text('source').notNull().default('imported'),
 
     title: text('title').notNull(),
     slug: text('slug').notNull(),
@@ -300,3 +304,96 @@ export const routineDayExercises = pgTable(
     uniqueIndex('routine_day_exercises_unique_order').on(table.routineDayId, table.sortOrder),
   ],
 );
+
+/* ----------------------------- */
+/* User Module        */
+/* ----------------------------- */
+
+export const users = pgTable('users', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: text('name').notNull(),
+  email: text('email').notNull().unique(),
+  passwordHash: text('password_hash').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+export const userBodyStats = pgTable('user_body_stats', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id),
+  weightKg: real('weight_kg'),
+  bmi: real('bmi'),
+  bodyFatPercent: real('body_fat_percent'),
+  measuredAt: timestamp('measured_at').notNull().defaultNow(),
+});
+
+export const goalEnum = pgEnum('goal', [
+  'lose_fat',
+  'build_muscle',
+  'improve_fitness',
+  'maintain_health',
+]);
+
+export const unitPreferenceEnum = pgEnum('unit_preference', ['metric', 'imperial']);
+
+export type UserScanMetric = {
+  value: number | string | null;
+  standard: 'Low' | 'Standard' | 'Excellent' | 'High' | 'Too High' | null;
+};
+
+export type UserBodyComposition = {
+  fatMassKg?: UserScanMetric;
+  fatFreeBodyWeightKg?: UserScanMetric;
+  muscleMassKg?: UserScanMetric;
+  muscleRatePercent?: UserScanMetric;
+  skeletalMusclePercent?: UserScanMetric;
+  boneMassKg?: UserScanMetric;
+  proteinMassKg?: UserScanMetric;
+  proteinPercent?: UserScanMetric;
+  waterWeightKg?: UserScanMetric;
+  bodyWaterPercent?: UserScanMetric;
+  subcutaneousFatPercent?: UserScanMetric;
+  visceralFat?: UserScanMetric;
+  bmrKcal?: UserScanMetric;
+  bodyAge?: UserScanMetric;
+  idealBodyWeightKg?: UserScanMetric;
+  obesityLevel?: UserScanMetric;
+  bodyType?: UserScanMetric;
+};
+
+export const userProfiles = pgTable('user_profiles', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id)
+    .unique(),
+  name: text('name'),
+  goal: goalEnum('goal'),
+  unitPreference: unitPreferenceEnum('unit_preference').default('metric'),
+  latestBodyComposition: jsonb('latest_body_composition').$type<UserBodyComposition | null>(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const usersRelations = relations(users, ({ one, many }) => ({
+  profile: one(userProfiles, {
+    fields: [users.id],
+    references: [userProfiles.userId],
+  }),
+  bodyStats: many(userBodyStats),
+}));
+
+export const userProfilesRelations = relations(userProfiles, ({ one }) => ({
+  user: one(users, {
+    fields: [userProfiles.userId],
+    references: [users.id],
+  }),
+}));
+
+export const userBodyStatsRelations = relations(userBodyStats, ({ one }) => ({
+  user: one(users, {
+    fields: [userBodyStats.userId],
+    references: [users.id],
+  }),
+}));
