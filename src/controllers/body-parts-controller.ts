@@ -1,4 +1,7 @@
-import { db } from '../lib/db.js';
+import { count } from 'drizzle-orm';
+
+import { db } from '../drizzle/db.js';
+import { bodyParts } from '../drizzle/schema.js';
 import { logControllerError } from '../lib/logger.js';
 
 export const getBodyParts = async (req, res) => {
@@ -12,25 +15,41 @@ export const getBodyParts = async (req, res) => {
       });
     }
 
-    const findOptions: any = {
-      skip: offset,
-    };
+    const totalResult = await db
+      .select({
+        count: count(),
+      })
+      .from(bodyParts);
 
-    if (Number.isInteger(limit) && limit > 0) {
-      findOptions.take = limit;
-    }
-
-    const [totalBodyParts, bodyParts] = await db.$transaction([
-      db.bodyParts.count(),
-      db.bodyParts.findMany(findOptions),
-    ]);
+    const bodyPartsData =
+      Number.isInteger(limit) && limit > 0
+        ? await db
+            .select({
+              id: bodyParts.id,
+              bodyPart: bodyParts.name,
+              exerciseCount: bodyParts.exerciseCount,
+              imageUrl: bodyParts.imageUrl,
+            })
+            .from(bodyParts)
+            .offset(offset)
+            .limit(limit)
+        : await db
+            .select({
+              id: bodyParts.id,
+              bodyPart: bodyParts.name,
+              exerciseCount: bodyParts.exerciseCount,
+              imageUrl: bodyParts.imageUrl,
+            })
+            .from(bodyParts)
+            .offset(offset);
+    const totalBodyParts = Number(totalResult[0]?.count || 0);
 
     return res.status(200).send({
       totalBodyParts: totalBodyParts,
-      count: bodyParts.length,
+      count: bodyPartsData.length,
       offset: offset,
       limit: limit || null,
-      data: bodyParts,
+      data: bodyPartsData,
     });
   } catch (error) {
     logControllerError(res, 'body-parts.list.failed', error, {

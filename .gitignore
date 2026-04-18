@@ -6,4 +6,4 @@ vcs.xml
 /generated/prisma
 dist
 .DS_Store
-data
+

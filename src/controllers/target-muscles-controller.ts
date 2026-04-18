@@ -1,4 +1,7 @@
-import { db } from '../lib/db.js';
+import { count } from 'drizzle-orm';
+
+import { db } from '../drizzle/db.js';
+import { targetMuscles } from '../drizzle/schema.js';
 import { logControllerError } from '../lib/logger.js';
 
 export const getTargetMuscles = async (req, res) => {
@@ -12,25 +15,41 @@ export const getTargetMuscles = async (req, res) => {
       });
     }
 
-    const findOptions: any = {
-      skip: offset,
-    };
+    const totalResult = await db
+      .select({
+        count: count(),
+      })
+      .from(targetMuscles);
 
-    if (Number.isInteger(limit) && limit > 0) {
-      findOptions.take = limit;
-    }
-
-    const [total, targetMuscles] = await db.$transaction([
-      db.targetMuscles.count(),
-      db.targetMuscles.findMany(findOptions),
-    ]);
+    const targetMusclesData =
+      Number.isInteger(limit) && limit > 0
+        ? await db
+            .select({
+              id: targetMuscles.id,
+              targetMuscle: targetMuscles.name,
+              exerciseCount: targetMuscles.exerciseCount,
+              imageUrl: targetMuscles.imageUrl,
+            })
+            .from(targetMuscles)
+            .offset(offset)
+            .limit(limit)
+        : await db
+            .select({
+              id: targetMuscles.id,
+              targetMuscle: targetMuscles.name,
+              exerciseCount: targetMuscles.exerciseCount,
+              imageUrl: targetMuscles.imageUrl,
+            })
+            .from(targetMuscles)
+            .offset(offset);
+    const total = Number(totalResult[0]?.count || 0);
 
     return res.status(200).send({
       totalTargetMuscles: total,
-      count: targetMuscles.length,
+      count: targetMusclesData.length,
       offset: offset,
       limit: limit || null,
-      data: targetMuscles,
+      data: targetMusclesData,
     });
   } catch (error) {
     logControllerError(res, 'target-muscles.list.failed', error, {

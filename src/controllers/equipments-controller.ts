@@ -1,4 +1,7 @@
-import { db } from '../lib/db.js';
+import { count } from 'drizzle-orm';
+
+import { db } from '../drizzle/db.js';
+import { equipments } from '../drizzle/schema.js';
 import { logControllerError } from '../lib/logger.js';
 
 export const getEquipments = async (req, res) => {
@@ -12,25 +15,41 @@ export const getEquipments = async (req, res) => {
       });
     }
 
-    const findOptions: any = {
-      skip: offset,
-    };
+    const totalResult = await db
+      .select({
+        count: count(),
+      })
+      .from(equipments);
 
-    if (Number.isInteger(limit) && limit > 0) {
-      findOptions.take = limit;
-    }
-
-    const [total, equipments] = await db.$transaction([
-      db.equipments.count(),
-      db.equipments.findMany(findOptions),
-    ]);
+    const equipmentsData =
+      Number.isInteger(limit) && limit > 0
+        ? await db
+            .select({
+              id: equipments.id,
+              equipment: equipments.name,
+              exerciseCount: equipments.exerciseCount,
+              imageUrl: equipments.imageUrl,
+            })
+            .from(equipments)
+            .offset(offset)
+            .limit(limit)
+        : await db
+            .select({
+              id: equipments.id,
+              equipment: equipments.name,
+              exerciseCount: equipments.exerciseCount,
+              imageUrl: equipments.imageUrl,
+            })
+            .from(equipments)
+            .offset(offset);
+    const total = Number(totalResult[0]?.count || 0);
 
     return res.status(200).send({
       totalEquipments: total,
-      count: equipments.length,
+      count: equipmentsData.length,
       offset: offset,
       limit: limit || null,
-      data: equipments,
+      data: equipmentsData,
     });
   } catch (error) {
     logControllerError(res, 'equipments.list.failed', error, {

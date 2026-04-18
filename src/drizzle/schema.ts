@@ -88,6 +88,7 @@ export const exercises = pgTable(
   },
   (table) => [
     uniqueIndex('exercises_slug_unique').on(table.slug),
+    index('exercises_exercise_id_idx').on(table.exerciseId.asc()),
     index('exercises_name_idx').on(table.name),
     index('exercises_body_part_idx').on(table.bodyPartId),
     index('exercises_equipment_idx').on(table.equipmentId),
@@ -317,6 +318,23 @@ export const users = pgTable('users', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
+export const refreshTokens = pgTable(
+  'refresh_tokens',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    token: text('token').notNull().unique(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id),
+    expiresAt: timestamp('expires_at').notNull(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (table) => [
+    index('refresh_tokens_user_id_idx').on(table.userId),
+    index('refresh_tokens_expires_at_idx').on(table.expiresAt),
+  ],
+);
+
 export const userBodyStats = pgTable('user_body_stats', {
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id')
@@ -382,6 +400,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     references: [userProfiles.userId],
   }),
   bodyStats: many(userBodyStats),
+  refreshTokens: many(refreshTokens),
 }));
 
 export const userProfilesRelations = relations(userProfiles, ({ one }) => ({
@@ -394,6 +413,13 @@ export const userProfilesRelations = relations(userProfiles, ({ one }) => ({
 export const userBodyStatsRelations = relations(userBodyStats, ({ one }) => ({
   user: one(users, {
     fields: [userBodyStats.userId],
+    references: [users.id],
+  }),
+}));
+
+export const refreshTokensRelations = relations(refreshTokens, ({ one }) => ({
+  user: one(users, {
+    fields: [refreshTokens.userId],
     references: [users.id],
   }),
 }));
