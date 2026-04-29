@@ -4,7 +4,7 @@ import { db } from '../drizzle/db.js';
 import { bodyParts, equipments, exercises, targetMuscles } from '../drizzle/schema.js';
 import { logControllerError } from '../lib/logger.js';
 
-interface IExerciseRequest {
+interface IExerciseRequest extends Request {
   query: {
     limit?: string;
     page?: string;
