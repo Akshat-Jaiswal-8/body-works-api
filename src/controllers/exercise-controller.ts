@@ -1,4 +1,5 @@
 import { and, asc, count, eq, ilike, or, sql } from 'drizzle-orm';
+import { Request, Response } from 'express';
 
 import { db } from '../drizzle/db.js';
 import { bodyParts, equipments, exercises, targetMuscles } from '../drizzle/schema.js';
@@ -18,7 +19,7 @@ interface IExerciseRequest extends Request {
   };
 }
 
-export const getExercises = async (req: IExerciseRequest, res) => {
+export const getExercises = async (req: IExerciseRequest, res: Response) => {
   try {
     const limit = parseInt(req.query?.limit) || 10;
     const page = parseInt(req.query?.page) || 1;
@@ -109,7 +110,7 @@ export const getExercises = async (req: IExerciseRequest, res) => {
         .leftJoin(targetMuscles, eq(exercises.targetMuscleId, targetMuscles.id))
         .where(and(...whereConditions));
 
-      totalExercises = countResult[0]?.count || 0;
+      totalExercises = Number(countResult[0]?.count) || 0;
     } else {
       const countResult = await db
         .select({
@@ -117,7 +118,7 @@ export const getExercises = async (req: IExerciseRequest, res) => {
         })
         .from(exercises)
         .execute();
-      totalExercises = countResult[0]?.count || 0;
+      totalExercises = Number(countResult[0]?.count) || 0;
     }
 
     const totalPages = Math.ceil(totalExercises / limit);
@@ -156,7 +157,7 @@ export const getExercises = async (req: IExerciseRequest, res) => {
   }
 };
 
-export const getExercise = async (req, res) => {
+export const getExercise = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
