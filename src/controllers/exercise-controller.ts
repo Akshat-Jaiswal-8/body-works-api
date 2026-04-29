@@ -71,12 +71,11 @@ export const getExercises = async (req: IExerciseRequest, res) => {
 
     const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
 
-    const exercisesWithRelations = await db
+    const rawExercises = await db
       .select({
         id: exercises.id,
         exerciseId: exercises.exerciseId,
         name: exercises.name,
-        slug: exercises.slug,
         title: exercises.title,
         blog: exercises.blog,
         gifUrl: exercises.gifUrl,
@@ -84,6 +83,9 @@ export const getExercises = async (req: IExerciseRequest, res) => {
         images: exercises.images,
         videos: exercises.videos,
         keywords: exercises.keywords,
+        bodyPart: bodyParts.name,
+        equipment: equipments.name,
+        target: targetMuscles.name,
       })
       .from(exercises)
       .leftJoin(bodyParts, eq(exercises.bodyPartId, bodyParts.id))
@@ -120,6 +122,22 @@ export const getExercises = async (req: IExerciseRequest, res) => {
 
     const totalPages = Math.ceil(totalExercises / limit);
 
+    const exercisesWithRelations = rawExercises.map((ex) => ({
+      id: ex.id,
+      id_: String(ex.exerciseId).padStart(4, '0'),
+      name: ex.name,
+      title: ex.title,
+      blog: ex.blog,
+      gifUrl: ex.gifUrl,
+      muscles_worked: ex.musclesWorked,
+      images: ex.images,
+      videos: ex.videos,
+      keywords: ex.keywords,
+      bodyPart: ex.bodyPart,
+      equipment: ex.equipment,
+      target: ex.target,
+    }));
+
     return res.status(200).send({
       totalExercises,
       totalPages,
@@ -151,12 +169,11 @@ export const getExercise = async (req, res) => {
       return res.status(400).send({ message: 'Invalid ExerciseId format.' });
     }
 
-    const [filteredExercise] = await db
+    const [rawExercise] = await db
       .select({
         id: exercises.id,
         exerciseId: exercises.exerciseId,
         name: exercises.name,
-        slug: exercises.slug,
         title: exercises.title,
         blog: exercises.blog,
         gifUrl: exercises.gifUrl,
@@ -164,13 +181,36 @@ export const getExercise = async (req, res) => {
         images: exercises.images,
         videos: exercises.videos,
         keywords: exercises.keywords,
+        bodyPart: bodyParts.name,
+        equipment: equipments.name,
+        target: targetMuscles.name,
       })
       .from(exercises)
+      .leftJoin(bodyParts, eq(exercises.bodyPartId, bodyParts.id))
+      .leftJoin(equipments, eq(exercises.equipmentId, equipments.id))
+      .leftJoin(targetMuscles, eq(exercises.targetMuscleId, targetMuscles.id))
       .where(eq(exercises.exerciseId, exerciseId))
       .limit(1);
-    if (!filteredExercise) {
+
+    if (!rawExercise) {
       return res.status(404).send({ message: 'Exercise not found.' });
     }
+
+    const filteredExercise = {
+      id: rawExercise.id,
+      id_: String(rawExercise.exerciseId).padStart(4, '0'),
+      name: rawExercise.name,
+      title: rawExercise.title,
+      blog: rawExercise.blog,
+      gifUrl: rawExercise.gifUrl,
+      muscles_worked: rawExercise.musclesWorked,
+      images: rawExercise.images,
+      videos: rawExercise.videos,
+      keywords: rawExercise.keywords,
+      bodyPart: rawExercise.bodyPart,
+      equipment: rawExercise.equipment,
+      target: rawExercise.target,
+    };
 
     return res.status(200).send({
       data: filteredExercise,
