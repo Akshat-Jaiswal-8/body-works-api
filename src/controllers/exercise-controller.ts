@@ -1,5 +1,5 @@
 import { and, asc, count, eq, ilike, or, sql } from 'drizzle-orm';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 
 import { db } from '../drizzle/db.js';
 import { bodyParts, equipments, exercises, targetMuscles } from '../drizzle/schema.js';

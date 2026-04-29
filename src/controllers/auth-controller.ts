@@ -1,7 +1,6 @@
 import { and, asc, count, eq, lte } from 'drizzle-orm';
 import type { CookieOptions, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import z from 'zod';
 
 import { MAX_DEVICE_SESSIONS, REFRESH_TOKEN_EXPIRES_MS } from '../constants/auth-constant.js';
@@ -19,7 +18,6 @@ import { logControllerError, serializeError } from '../lib/logger.js';
 interface IRegisterUserRequestBody {
   name: string;
   email: string;
-  phone_number?: string;
   password: string;
 }
 
@@ -32,25 +30,6 @@ const userSchema = z.object({
     .max(50, { error: 'Name should have atmost 50 characters.' }),
 
   email: z.email(),
-
-  phone_number: z
-    .string()
-    .transform((val, ctx) => {
-      const phone = parsePhoneNumberFromString(val, {
-        defaultCountry: 'IN',
-        extract: false,
-      });
-      if (phone && phone.isValid()) {
-        return phone.number;
-      }
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Invalid phone number',
-      });
-
-      return z.NEVER;
-    })
-    .optional(),
 
   password: z
     .string()
@@ -80,7 +59,7 @@ const getRefreshCookieOptions = (): CookieOptions => {
 
 export const registerUser = async (req: Request, res: Response) => {
   try {
-    const { name, email, phone_number, password } = req.body as IRegisterUserRequestBody;
+    const { name, email, password } = req.body as IRegisterUserRequestBody;
 
     if (!name || !email || !password) {
       return res.status(400).json({

@@ -1,5 +1,5 @@
 import { count, desc, eq } from 'drizzle-orm';
-import type { Request, Response } from 'express';
+import type { AuthenticatedRequest, Response } from 'express';
 import z from 'zod';
 
 import { db } from '../drizzle/db.js';

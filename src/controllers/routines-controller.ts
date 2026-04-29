@@ -348,10 +348,10 @@ export const getRoutines = async (req, res) => {
     return res.status(200).send({
       totalRoutines,
       totalPages,
-      count: filteredRoutines.length,
+      count: data.length,
       page,
       limit,
-      data: filteredRoutines,
+      data,
     });
   } catch (error) {
     logControllerError(res, 'routines.list.failed', error, {
