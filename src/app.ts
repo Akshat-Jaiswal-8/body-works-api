@@ -76,7 +76,7 @@ app.get('/health', (_req, res) => {
   });
 });
 
-app.use('/', (_req, res) => {
+app.get('/', (_req, res) => {
   res.set({
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
