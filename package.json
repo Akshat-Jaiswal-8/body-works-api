@@ -18,7 +18,7 @@
     "lint:fix": "npm run lint -- --fix",
     "start": "node dist/server.js",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --detectOpenHandles",
-    "test:migration": "RUN_MIGRATION_CONTRACT=true RUN_MIGRATION_TYPES=true node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand src/tests/migration.contract.test.ts src/tests/migration.types.test.ts --detectOpenHandles",
+    "test:migration": "RUN_MIGRATION_CONTRACT=true RUN_MIGRATION_TYPES=true node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand --detectOpenHandles",
     "format:check": "prettier --check \"**/*.{js,ts}\" --cache",
     "format:write": "prettier --write \"**/*.{js,ts}\" --cache",
     "prepare": "husky"
