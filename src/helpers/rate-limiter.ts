@@ -9,13 +9,3 @@ export const generalLimiter = rateLimit({
   standardHeaders: 'draft-7',
   legacyHeaders: false,
 });
-
-export const strictLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 20,
-  message: {
-    error: 'Rate limit exceeded for this endpoint.',
-  },
-  standardHeaders: 'draft-7',
-  legacyHeaders: false,
-});

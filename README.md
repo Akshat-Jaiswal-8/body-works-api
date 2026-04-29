@@ -1,550 +1,442 @@
 # Body Works API
 
-Welcome to the Body Works API! This API provides comprehensive information on exercises, body parts, target muscles, equipment, and routines. It is designed to help users find and utilize various fitness resources to improve their health and workout regimens.
+Body Works API is a TypeScript + Express backend for fitness data and personalized user features.
 
-## Base URL
+It provides:
 
-### https://api.bodyworks.akshatjaiswal.me/api/v1
+- Exercise and routine discovery
+- Category metadata (body parts, target muscles, equipments)
+- JWT authentication with refresh-token rotation
+- User profile/settings management
+- User body stats logging with pagination
 
-## Endpoints :-
+## Tech Stack
 
-### 1. Get Exercises Information
+- Framework: Express.js + TypeScript
+- Database: MongoDB (Prisma ORM)
+- Auth: JWT (access token + refresh token via HTTP-only cookie)
+- Validation: Zod
+- Security and DX: Helmet, CORS, rate limiting, Winston logger
 
-- **Endpoint :** `/exercises`
-- **Method :** GET
-- **Params :**
+## Base URLs
 
-```
-page: 1
-limit: 10
-equipment: eg.
-bodypart: eg. waist
-targetMuscle: eg. abs
-search: anything related to exercise.
-```
+- Production API: `https://api.bodyworks.akshatjaiswal.me/api/v1`
+- Local API (default): `http://localhost:8000/api/v1`
 
-- **API will look like this :**
+## Quick Start
 
-```
-https://api.bodyworks.akshatjaiswal.me/exercises?limit=10&page=1&bodyPart=waist&equipment=body%20weight&targetMuscle=abs
+### 1. Install dependencies
 
-```
-
-- **Response type :**
-
-```
-Array of objects containing the following entries:
-
-name: string;
-title: string;
-target: string;
-"muscles worked": string;
-bodyPart: string;
-equipment: string;
-id: string;
-blog: string;
-images: string[];
-gifUrl: string;
-videos: string[];
-keywords: string[];
+```bash
+npm install
 ```
 
-- **Sample Response:**
+### 2. Configure environment variables
+
+Create a `.env` file in project root:
+
+```env
+NODE_ENV=development
+PORT=8000
+DATABASE_URL="mongodb+srv://<username>:<password>@<cluster>/<db>?retryWrites=true&w=majority"
+ACCESS_TOKEN_SECRET="your-access-token-secret"
+REFRESH_TOKEN_SECRET="your-refresh-token-secret"
+ALLOWED_ORIGINS="http://localhost:3000,http://localhost:5173"
+```
+
+### 3. Generate Prisma client
+
+```bash
+npx prisma generate
+```
+
+### 4. Run the server
+
+```bash
+npm run dev
+```
+
+Server starts on `http://localhost:8000` by default.
+
+## NPM Scripts
+
+- `npm run dev` - Start development server with watch mode
+- `npm run build` - Build TypeScript to `dist/`
+- `npm run start` - Start production build from `dist/server.js`
+- `npm run lint` - Run ESLint
+- `npm run lint:fix` - Auto-fix lint issues
+- `npm run typecheck` - TypeScript type check
+- `npm run format:check` - Prettier check
+- `npm run format:write` - Prettier write
+
+## Health and Root Endpoints
+
+- `GET /health` - Service health check with timestamp
+- `GET /` - API welcome metadata
+
+## Authentication Model
+
+Protected endpoints require:
+
+```http
+Authorization: Bearer <access_token>
+```
+
+Refresh flow details:
+
+- Refresh token is stored in HTTP-only cookie: `refreshToken`
+- Cookie path: `/api/v1/auth`
+- Rotation enabled: each refresh call invalidates previous refresh token
+- On suspicious refresh-token reuse, all user sessions are revoked
+
+## API Reference
+
+All endpoints below are prefixed with `/api/v1`.
+
+### Auth
+
+#### `POST /auth/register`
+
+Register a new user.
+
+Request body:
 
 ```json
 {
-  "totalExercises": 220,
-  "totalPages": 220,
-  "data": [
-    {
-      "name": "3/4 sit-up",
-      "title": "3/4 Sit-Up",
-      "target": "abs",
-      "muscles worked": "- Rectus abdominis (six-pack muscles)\n- Hip flexors\n- Lower back muscles\n",
-      "bodyPart": "waist",
-      "equipment": "body weight",
-      "id": "0001",
-      "blog": "# 3/4 Sit-Up\n\n## Description\nThe 3/4 sit-up is an abdominal exercise that targets the rectus abdominis, commonly known as the \"six-pack\" muscles. It also engages the hip flexors and the muscles of the lower back. This exercise aims to strengthen the core muscles and improve overall abdominal stability.\n\n## Instructions\n1. Start by lying on your back on a mat or a flat surface with your knees bent and feet flat on the ground. Keep your feet hip-width apart.\n2. Place your hands lightly behind your head, supporting your neck with your fingertips. Avoid pulling on your neck during the exercise.\n3. Engage your abdominal muscles by drawing your belly button in towards your spine.\n4. Slowly lift your upper body off the ground, curling your shoulders towards your knees. Keep your lower back in contact with the ground throughout the movement.\n5. Stop when your torso is at a 45-degree angle from the ground, or when you feel a strong contraction in your abdominal muscles. This position is often referred to as the \"three-quarter\" point.\n6. Hold this position briefly, then slowly lower your upper body back down to the starting position, maintaining control and engaging your core.\n7. Repeat the movement for the desired number of repetitions.\n\n## Variations\n- Beginner Variation: If you are a beginner or have difficulty performing the full 3/4 sit-up, you can start by lifting your upper body only a few inches off the ground and gradually increase the range of motion as your core strength improves.\n- Advanced Variation: To make the exercise more challenging, you can hold a weight plate or a medicine ball against your chest while performing the 3/4 sit-up.\n\n## Muscles Worked\n- Rectus abdominis (six-pack muscles)\n- Hip flexors\n- Lower back muscles\n\n## Common Mistakes\n- Using momentum: Avoid using momentum to lift your upper body. Focus on controlled movements and use your abdominal muscles to initiate the movement.\n- Neck strain: Do not pull on your neck with your hands during the exercise. Use your fingertips for light support only.\n- Arching the lower back: Keep your lower back in contact with the ground throughout the movement to maintain proper form and prevent strain on the lower back.\n\n## Safety Precautions\n- Consult with a healthcare professional before starting any new exercise program, especially if you have a history of back or neck problems.\n- If you experience any pain or discomfort during the exercise, stop immediately and seek medical advice.\n- Engage your core muscles and maintain proper form throughout the exercise to minimize the risk of injury.\n- If you have difficulty maintaining stability or if you have a weak core, it is recommended to perform this exercise under the supervision of a qualified fitness professional.",
-      "images": [
-        "api.bodyworks.akshatjaiswal.me/assets/images/0001/1.jpeg",
-        "api.bodyworks.akshatjaiswal.me/assets/images/0001/2.jpeg",
-        "api.bodyworks.akshatjaiswal.me/assets/images/0001/3.jpeg",
-        "api.bodyworks.akshatjaiswal.me/assets/images/0001/4.jpeg",
-        "api.bodyworks.akshatjaiswal.me/assets/images/0001/5.jpeg"
-      ],
-      "gifUrl": "api.bodyworks.akshatjaiswal.me/assets/gifs/0001.gif",
-      "videos": [
-        "https://www.youtube.com/watch?v=-B9lsTWsJCo",
-        "https://www.youtube.com/watch?v=FXalPpHfkZk",
-        "https://www.youtube.com/watch?v=nxFgeTpBP6s",
-        "https://www.youtube.com/watch?v=A7Y2-G4zOUA",
-        "https://www.youtube.com/watch?v=Mm6spB-hms8"
-      ],
-      "keywords": [
-        "3/4 sit-up",
-        "Abdominal exercise",
-        "Rectus abdominis",
-        "Six-pack muscles",
-        "Hip flexors",
-        "Lower back muscles",
-        "Core strength",
-        "Abdominal stability",
-        "Exercise instructions",
-        "Variations",
-        "Beginner variation",
-        "Advanced variation",
-        "Muscles worked",
-        "Common mistakes",
-        "Safety precautions",
-        "Healthcare professional",
-        "Back and neck problems",
-        "Pain and discomfort",
-        "Proper form",
-        "Qualified fitness professional"
-      ]
-    }
-  ]
+  "name": "John Doe",
+  "email": "john@example.com",
+  "phone_number": "+919876543210",
+  "password": "strongpassword"
 }
 ```
 
-### 2. Get specific exercise Information
+Validation notes:
 
-- **Endpoint :** `/exercises/<id>`
-- **Description :** `Making a GET request on this link will return an exercise which corresponds to the id.`
-- **Method :** GET
-- **Params :**
+- `name`: 2 to 50 chars
+- `email`: valid email
+- `phone_number`: valid phone number
+- `password`: 8 to 16 chars
 
-```
-id : eg.0001
-```
-
-- **API will look like this :**
-
-```
-https://api.bodyworks.akshatjaiswal.me/exercises/0001
-```
-
-- **Response type :**
-
-```
-Response Type
-Object containing the following entries:
-
-name: string;
-title: string;
-target: string;
-"muscles worked": string;
-bodyPart: string;
-equipment: string;
-id: string;
-blog: string;
-images: string[];
-gifUrl: string;
-videos: string[];
-keywords: string[];
-```
-
-- **Sample Response:**
+Success response (201):
 
 ```json
 {
   "data": {
-    "name": "3/4 sit-up",
-    "title": "3/4 Sit-Up",
-    "target": "abs",
-    "muscles worked": "- Rectus abdominis (six-pack muscles)\n- Hip flexors\n- Lower back muscles\n",
-    "bodyPart": "waist",
-    "equipment": "body weight",
-    "id": "0001",
-    "blog": "# 3/4 Sit-Up\n\n## Description\nThe 3/4 sit-up is an abdominal exercise that targets the rectus abdominis, commonly known as the \"six-pack\" muscles. It also engages the hip flexors and the muscles of the lower back. This exercise aims to strengthen the core muscles and improve overall abdominal stability.\n\n## Instructions\n1. Start by lying on your back on a mat or a flat surface with your knees bent and feet flat on the ground. Keep your feet hip-width apart.\n2. Place your hands lightly behind your head, supporting your neck with your fingertips. Avoid pulling on your neck during the exercise.\n3. Engage your abdominal muscles by drawing your belly button in towards your spine.\n4. Slowly lift your upper body off the ground, curling your shoulders towards your knees. Keep your lower back in contact with the ground throughout the movement.\n5. Stop when your torso is at a 45-degree angle from the ground, or when you feel a strong contraction in your abdominal muscles. This position is often referred to as the \"three-quarter\" point.\n6. Hold this position briefly, then slowly lower your upper body back down to the starting position, maintaining control and engaging your core.\n7. Repeat the movement for the desired number of repetitions.\n\n## Variations\n- Beginner Variation: If you are a beginner or have difficulty performing the full 3/4 sit-up, you can start by lifting your upper body only a few inches off the ground and gradually increase the range of motion as your core strength improves.\n- Advanced Variation: To make the exercise more challenging, you can hold a weight plate or a medicine ball against your chest while performing the 3/4 sit-up.\n\n## Muscles Worked\n- Rectus abdominis (six-pack muscles)\n- Hip flexors\n- Lower back muscles\n\n## Common Mistakes\n- Using momentum: Avoid using momentum to lift your upper body. Focus on controlled movements and use your abdominal muscles to initiate the movement.\n- Neck strain: Do not pull on your neck with your hands during the exercise. Use your fingertips for light support only.\n- Arching the lower back: Keep your lower back in contact with the ground throughout the movement to maintain proper form and prevent strain on the lower back.\n\n## Safety Precautions\n- Consult with a healthcare professional before starting any new exercise program, especially if you have a history of back or neck problems.\n- If you experience any pain or discomfort during the exercise, stop immediately and seek medical advice.\n- Engage your core muscles and maintain proper form throughout the exercise to minimize the risk of injury.\n- If you have difficulty maintaining stability or if you have a weak core, it is recommended to perform this exercise under the supervision of a qualified fitness professional.",
-    "images": [
-      "api.bodyworks.akshatjaiswal.me/assets/images/0001/1.jpeg",
-      "api.bodyworks.akshatjaiswal.me/assets/images/0001/2.jpeg",
-      "api.bodyworks.akshatjaiswal.me/assets/images/0001/3.jpeg",
-      "api.bodyworks.akshatjaiswal.me/assets/images/0001/4.jpeg",
-      "api.bodyworks.akshatjaiswal.me/assets/images/0001/5.jpeg"
-    ],
-    "gifUrl": "api.bodyworks.akshatjaiswal.me/assets/gifs/0001.gif",
-    "videos": [
-      "https://www.youtube.com/watch?v=-B9lsTWsJCo",
-      "https://www.youtube.com/watch?v=FXalPpHfkZk",
-      "https://www.youtube.com/watch?v=nxFgeTpBP6s",
-      "https://www.youtube.com/watch?v=A7Y2-G4zOUA",
-      "https://www.youtube.com/watch?v=Mm6spB-hms8"
-    ],
-    "keywords": [
-      "3/4 sit-up",
-      "Abdominal exercise",
-      "Rectus abdominis",
-      "Six-pack muscles",
-      "Hip flexors",
-      "Lower back muscles",
-      "Core strength",
-      "Abdominal stability",
-      "Exercise instructions",
-      "Variations",
-      "Beginner variation",
-      "Advanced variation",
-      "Muscles worked",
-      "Common mistakes",
-      "Safety precautions",
-      "Healthcare professional",
-      "Back and neck problems",
-      "Pain and discomfort",
-      "Proper form",
-      "Qualified fitness professional"
-    ]
+    "id": "<user-id>",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "accessToken": "<jwt-access-token>"
+  },
+  "message": "user created successfully."
+}
+```
+
+#### `POST /auth/login`
+
+Login an existing user.
+
+Request body:
+
+```json
+{
+  "email": "john@example.com",
+  "password": "strongpassword"
+}
+```
+
+Success response (200):
+
+```json
+{
+  "data": {
+    "id": "<user-id>",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "accessToken": "<jwt-access-token>"
   }
 }
 ```
 
-### 3. Get Equipments Information
+Also sets HTTP-only `refreshToken` cookie.
 
-- **Endpoint :** `/equipments`
-- **Description :** `Making a GET request on this link will return an array of all the equipments that may be used to filter the data from the exercise api.`
-- **Method :** GET
-- **API will look like this :**
+#### `POST /auth/refresh-token`
 
-```
-https://api.bodyworks.akshatjaiswal.me/equipments
-```
+Issue a new access token using refresh token cookie.
 
-- **Response type :**
-
-```
-Array of objects containing the following entries:
-
-exerciseCount: number
-equipment: string
-```
-
-- **Sample Response:**
+Success response (200):
 
 ```json
 {
-  "totalEquipments": 28,
-  "data": [
-    {
-      "imageUrl": "localhost:8000/assets/category-images/equipment-images/body-weight.webp",
-      "equipment": "body weight",
-      "exerciseCount": 315
-    },
-    {
-      "imageUrl": "localhost:8000/assets/category-images/equipment-images/leverage-machine.webp",
-      "equipment": "leverage machine",
-      "exerciseCount": 83
-    }
-  ]
+  "id": "<user-id>",
+  "accessToken": "<jwt-access-token>"
 }
 ```
 
-### 4. Get Target Muscles Information
+Also rotates and resets `refreshToken` cookie.
 
-- **Endpoint :** `/targetMuscles`
-- **Description :** `Making a GET request on this link will return an array of all the target muscles that may be used to filter the data from the exercise api.
-`
-- **Method :** GET
-- **API will look like this :**
+#### `POST /auth/logout`
 
-```
-https://api.bodyworks.akshatjaiswal.me/api/v1/targetMuscles
-```
+Logout current refresh-token session.
 
-- **Response type :**
-
-```
-Array of objects containing the following entries:
-
-exerciseCount: number
-equipment: string
-```
-
-- **Sample Response:**
+Success response (200):
 
 ```json
 {
-  "totalTargetMuscles": 19,
-  "data": [
-    {
-      "imageUrl": "localhost:8000/assets/category-images/target-muscle-images/abs.webp",
-      "targetMuscle": "abs",
-      "exerciseCount": 170
-    },
-    {
-      "imageUrl": "localhost:8000/assets/category-images/target-muscle-images/glutes.webp",
-      "targetMuscle": "glutes",
-      "exerciseCount": 277
-    }
-  ]
+  "message": "Logged out successfully."
 }
 ```
 
-### 5. Get Body Parts Information
+### Exercises
 
-- **Endpoint :** `/bodyParts`
-- **Description :** `Making a GET request on this link will return an array of all the body parts that may be used to filter the data from the exercise api.`
-- **Method :** GET
-- **API will look like this :**
+#### `GET /exercises` (Authenticated)
 
+Get paginated exercises with optional filters.
+
+Query params:
+
+- `page` (default: `1`)
+- `limit` (default: `10`)
+- `bodyPart`
+- `equipment`
+- `target`
+- `search` (matches multiple fields like name/title/target/muscles/bodyPart/equipment/blog/keywords)
+
+Success response (200):
+
+```json
+{
+  "totalExercises": 170,
+  "totalPages": 17,
+  "count": 10,
+  "page": 1,
+  "limit": 10,
+  "data": []
+}
 ```
-https://api.bodyworks.akshatjaiswal.me/bodyParts
+
+#### `GET /exercises/:id`
+
+Get a single exercise by ID (supports numeric value like `1`, internally padded to `0001`).
+
+Success response (200):
+
+```json
+{
+  "data": {}
+}
 ```
 
-- **Response type :**
+### Routines
 
+#### `GET /routines`
+
+Get paginated routines with optional filters.
+
+Query params:
+
+- `page` (default: `1`)
+- `limit` (default: `10`)
+- `goal`
+- `type`
+- `level`
+- `duration`
+- `days_per_week`
+- `time`
+- `equipment`
+- `gender`
+- `category`
+- `search`
+
+Success response (200):
+
+```json
+{
+  "totalRoutines": 120,
+  "totalPages": 12,
+  "count": 10,
+  "offset": 0,
+  "limit": 10,
+  "data": []
+}
 ```
-Array of objects containing the following entries:
 
-exerciseCount: number
-equipment: string
+#### `GET /routines/:id`
+
+Get routine by numeric routine ID.
+
+Success response (200):
+
+```json
+{
+  "data": {}
+}
 ```
 
-- **Sample Response:**
+#### `GET /routines/filters`
+
+Get available values for a specific routine filter.
+
+Query params:
+
+- `filter` (required)
+- Allowed values: `category`, `days_per_week`, `duration`, `equipment`, `gender`, `level`, `main_goal`, `workout_type`
+
+Success response (200) example:
+
+```json
+{
+  "totalRoutinesFilter": 8,
+  "count": 8,
+  "data": {
+    "level": []
+  }
+}
+```
+
+### Category Metadata
+
+Common query params for all category endpoints:
+
+- `limit` (default: `10`)
+- `offset` (default: `0`)
+
+#### `GET /bodyParts`
+
+Success response (200):
 
 ```json
 {
   "totalBodyParts": 10,
-  "data": [
-    {
-      "imageUrl": "localhost:8000/assets/category-images/bodypart-images/waist.webp",
-      "bodyPart": "waist",
-      "exerciseCount": 163
-    },
-    {
-      "imageUrl": "localhost:8000/assets/category-images/bodypart-images/upper-legs.webp",
-      "bodyPart": "upper legs",
-      "exerciseCount": 221
-    },
-    {
-      "imageUrl": "localhost:8000/assets/category-images/bodypart-images/chest.webp",
-      "bodyPart": "chest",
-      "exerciseCount": 157
-    }
-  ]
+  "count": 10,
+  "offset": 0,
+  "limit": 10,
+  "data": []
 }
 ```
 
-### 6. Get Routines Information
+#### `GET /equipments`
 
-- **Endpoint :** `/routines`
-- **Description :** `Making a GET request on this link will return an array of all the routines which match the assigned filters.`
-- **Method :** GET
-- **Params :**
-
-```
-limit : 10
-page : 1
-goal : eg.build muscle
-type : eg.full body
-level : eg.beginner
-duration : eg.4 weeks
-days_per_week : eg.4
-time : eg.30-60 minutes
-equipment : eg.bodyweight
-gender : eg.male
-category : eg.Workout for men
-search : eg.anything related to routine
-```
-
-- **API will look like this :**
-
-```
-https://api.bodyworks.akshatjaiswal.me/routines?limit=10&page=1
-
-```
-
-- **Response type :**
-
-```
-Array of objects containing the following entries:
-
-category: string[];
-routine: {
-  routine_title: string;
-  routine_description: string;
-  routine_imageUrl: string;
-  workout_summary: {
-     Main Goal: string;
-     Workout Type: string;
-     Training Level: string;
-     Program Duration: string;
-     Days Per Week: string;
-     Time Per Workout: string;
-     Equipment Required: string;
-     Target Gender": string;
-};
-workout_plan: {
-     heading: string | null;
-     day_plan: string;
-}[];
-id : number;
-```
-
-- **Sample Response:**
+Success response (200):
 
 ```json
 {
-  "totalRoutines": 604,
-  "totalPages": 302,
-  "finalData": [
-    {
-      "category": ["Workouts For Men", "Muscle Building", "Full Body", "Bodyweight", "At Home"],
-      "routine": {
-        "routine_title": "Body Like A God: A Complete Bodyweight Muscle Building Plan",
-        "routine_description": "No equipment or gym? No problem. Build muscle at home with this classic bodyweight training system. This is a flexible training system that focuses on the use of exercise complexes.",
-        "routine_imageUrl": "api.bodyworks.akshatjaiswal.me/assets/routine/1.webp",
-        "workout_summary": {
-          "Main Goal": "Build Muscle",
-          "Workout Type": "Full Body",
-          "Training Level": "Beginner",
-          "Program Duration": "4 weeks",
-          "Days Per Week": "4",
-          "Time Per Workout": "30-60 minutes",
-          "Equipment Required": "Bodyweight",
-          "Target Gender": "Male & Female"
-        },
-        "workout_plan": [
-          {
-            "heading": "Complex 1",
-            "day_plan": "<table>\n<tbody>\n<tr>\n<th> Exercise</th>\n<th> Sets</th>\n<th> Reps</th>\n</tr>\n<tr>\n<td colspan=\"4\"> Complex 1</td>\n</tr>\n<tr>\n<td> Push Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Medium-Grip Pull Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Handstand or Jackknife Push Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Diamond Push Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Inverted Rack Curl Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td colspan=\"4\"> Complex 2</td>\n</tr>\n<tr>\n<td> Single-Leg Calf Raise</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Jump Squat</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Walking Lunge</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Hanging Leg Raise</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Short All-Out Sprint Outdoors or on Treadmill</td>\n<td> 2-5</td>\n<td> Distance &amp; Duration varies according to fitness level &amp; experience.</td>\n</tr>\n</tbody>\n</table>"
-          },
-          {
-            "heading": "Complex 2",
-            "day_plan": "<table>\n<tbody>\n<tr>\n<th> Exercise</th>\n<th> Sets</th>\n<th> Reps</th>\n</tr>\n<tr>\n<td colspan=\"4\"> Complex 1</td>\n</tr>\n<tr>\n<td> Feet Elevated Push Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Wide Grip Inverted Row</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Rack Triceps Press or Parallel Bar Dips</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Shoulder Width Reverse Grip Pull Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Floor Crunch or Planks</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td colspan=\"4\"> Complex 2</td>\n</tr>\n<tr>\n<td> Box Jump or Jump Squat</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Bulgarian Split Squat</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Reverse Lunge</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Bench Step Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Short All-Out Sprint Outdoors or on Treadmill</td>\n<td> 2-5</td>\n<td> Distance &amp; Duration varies according to fitness level &amp; experience.</td>\n</tr>\n</tbody>\n</table>"
-          }
-        ]
-      },
-      "id": 1
-    },
-    {
-      "category": ["Workouts For Men", "Muscle Building"],
-      "routine": {
-        "routine_title": "“No Juice” Advanced Bodybuilding Workout Routine",
-        "routine_description": "Avoid plateauing with the \"No Juice\" routine, which manipulates intensity, frequency, and volume to help you continue progressing in the gym.",
-        "routine_imageUrl": "api.bodyworks.akshatjaiswal.me/assets/routine/2.webp",
-        "workout_summary": {
-          "Main Goal": "Build Muscle",
-          "Workout Type": "Split",
-          "Training Level": "Advanced",
-          "Program Duration": "8 weeks",
-          "Days Per Week": "6",
-          "Time Per Workout": "60-75 minutes",
-          "Equipment Required": "Barbell, Bodyweight, Cables, Dumbbells, Machines",
-          "Target Gender": "Male & Female"
-        },
-        "workout_plan": [
-          {
-            "heading": "Day 1: Chest & Back",
-            "day_plan": "<table>\n<tbody>\n<tr>\n<th> Exercise</th>\n<th> Sets</th>\n<th> Reps</th>\n</tr>\n<tr>\n<td colspan=\"3\"> Bench Press: work up to a 5 rep max for the day</td>\n</tr>\n<tr>\n<td> - Set 1 at 50%</td>\n<td> 1</td>\n<td> 5</td>\n</tr>\n<tr>\n<td> - Set 2 at 60%</td>\n<td> 1</td>\n<td> 5</td>\n</tr>\n<tr>\n<td> - Set 3 at 70%</td>\n<td> 1</td>\n<td> 5</td>\n</tr>\n<tr>\n<td> - Set 4 at 80%</td>\n<td> 1</td>\n<td> 5</td>\n</tr>\n<tr>\n<td> - Set 5 at 90%</td>\n<td> 1</td>\n<td> 5</td>\n</tr>\n<tr>\n<td> - Set 6 at 100%</td>\n<td> 1</td>\n<td> 5</td>\n</tr>\n<tr>\n<td> Incline Dumbbell Press</td>\n<td> 3</td>\n<td> 6-8</td>\n</tr>\n<tr>\n<td> Dips</td>\n<td> 3</td>\n<td> 6-10</td>\n</tr>\n<tr>\n<td> Pullups</td>\n<td> 3</td>\n<td> 5-8</td>\n</tr>\n<tr>\n<td> Pendlay Rows</td>\n<td> 3</td>\n<td> 6-10</td>\n</tr>\n<tr>\n<td> Pulldowns</td>\n<td> 3</td>\n<td> 6-10</td>\n</tr>\n</tbody>\n</table>"
-          },
-          {
-            "heading": "Day 2: Legs",
-            "day_plan": "<table>\n<tbody>\n<tr>\n<th> Exercise</th>\n<th> Sets</th>\n<th> Reps</th>\n</tr>\n<tr>\n<td colspan=\"3\"> Squats: work up to a 5 rep max for the day</td>\n</tr>\n<tr>\n<td> - Set 1 at 50%</td>\n<td> 1</td>\n<td> 5</td>\n</tr>\n<tr>\n<td> - Set 2 at 60%</td>\n<td> 1</td>\n<td> 5</td>\n</tr>\n<tr>\n<td> - Set 3 at 70%</td>\n<td> 1</td>\n<td> 5</td>\n</tr>\n<tr>\n<td> - Set 4 at 80%</td>\n<td> 1</td>\n<td> 5</td>\n</tr>\n<tr>\n<td> - Set 5 at 90%</td>\n<td> 1</td>\n<td> 5</td>\n</tr>\n<tr>\n<td> - Set 6 at 100%</td>\n<td> 1</td>\n<td> 5</td>\n</tr>\n<tr>\n<td> Leg Press</td>\n<td> 3</td>\n<td> 6-10</td>\n</tr>\n<tr>\n<td> Stiff-Legged Deadlift</td>\n<td> 5</td>\n<td> 5</td>\n</tr>\n<tr>\n<td> Hamstring Curls</td>\n<td> 3</td>\n<td> 6-8</td>\n</tr>\n<tr>\n<td> Calf-Raise</td>\n<td> 5</td>\n<td> 10</td>\n</tr>\n</tbody>\n</table>"
-          },
-          {
-            "heading": "Day 3: Shoulders & Arms",
-            "day_plan": "<table>\n<tbody>\n<tr>\n<th> Exercise</th>\n<th> Sets</th>\n<th> Reps</th>\n</tr>\n<tr>\n<td> Military Press or Dumbbell Press</td>\n<td> 3</td>\n<td> 6-8</td>\n</tr>\n<tr>\n<td> Lateral Raises</td>\n<td> 5</td>\n<td> 10</td>\n</tr>\n<tr>\n<td> Barbell Curls</td>\n<td> 5</td>\n<td> 6-10</td>\n</tr>\n<tr>\n<td> Dumbbell Curls</td>\n<td> 3</td>\n<td> 6-10</td>\n</tr>\n</tbody>\n</table>"
-          },
-          {
-            "heading": "Day 4: Rest",
-            "day_plan": "<table>\n<tbody>\n<tr>\n<th> Exercise</th>\n<th> Sets</th>\n<th> Reps</th>\n</tr>\n<tr>\n<td> Off</td>\n</tr>\n</tbody>\n</table>"
-          },
-          {
-            "heading": "Day 5: Chest, Shoulders, & Triceps",
-            "day_plan": "<table>\n<tbody>\n<tr>\n<th> Exercise</th>\n<th> Sets</th>\n<th> Reps</th>\n</tr>\n<tr>\n<td> Flat Dumbbell Press</td>\n<td> 5</td>\n<td> 20-6 (Pyramiding)</td>\n</tr>\n<tr>\n<td> Incline Dumbbell Press</td>\n<td> 3</td>\n<td> 6-10</td>\n</tr>\n<tr>\n<td> Hammer Strength Press</td>\n<td> 3</td>\n<td> 10</td>\n</tr>\n<tr>\n<td> Cable Flys</td>\n<td> 3</td>\n<td> 12-15</td>\n</tr>\n<tr>\n<td> Lateral Raises</td>\n<td> 5</td>\n<td> 15-20</td>\n</tr>\n<tr>\n<td> Reverse-Grip Pull-Downs</td>\n<td> 5</td>\n<td> 15-20</td>\n</tr>\n</tbody>\n</table>"
-          },
-          {
-            "heading": "Day 6: Back & Biceps",
-            "day_plan": "<table>\n<tbody>\n<tr>\n<th> Exercise</th>\n<th> Sets</th>\n<th> Reps</th>\n</tr>\n<tr>\n<td> Barbell Rows</td>\n<td> 5</td>\n<td> 20-8 (Pyramiding)</td>\n</tr>\n<tr>\n<td> Barbell Shrugs</td>\n<td> 3</td>\n<td> 15-20</td>\n</tr>\n<tr>\n<td> Rack Deadlifts</td>\n<td> 3</td>\n<td> 10-12</td>\n</tr>\n<tr>\n<td> Pullups</td>\n<td> 3</td>\n<td> 6-10</td>\n</tr>\n<tr>\n<td> Pulldowns</td>\n<td> 3</td>\n<td> 6-10</td>\n</tr>\n</tbody>\n</table>"
-          },
-          {
-            "heading": "Day 7: Legs",
-            "day_plan": "<table>\n<tbody>\n<tr>\n<th> Exercise</th>\n<th> Sets</th>\n<th> Reps</th>\n</tr>\n<tr>\n<td> Front Squats</td>\n<td> 5</td>\n<td> 20-8 (Pyramiding)</td>\n</tr>\n<tr>\n<td> Leg Extensions</td>\n<td> 5</td>\n<td> 10</td>\n</tr>\n<tr>\n<td> Hamstring Curls</td>\n<td> 5</td>\n<td> 6-10</td>\n</tr>\n<tr>\n<td> Seated Calf Raise</td>\n<td> 5</td>\n<td> 6-10</td>\n</tr>\n<tr>\n<td> Standing Calf Raise</td>\n<td> 3</td>\n<td> 8-12</td>\n</tr>\n</tbody>\n</table>"
-          },
-          {
-            "heading": "Day 8: Rest",
-            "day_plan": "<table>\n<tbody>\n<tr>\n<th> Exercise</th>\n<th> Sets</th>\n<th> Reps</th>\n</tr>\n<tr>\n<td> Off</td>\n</tr>\n</tbody>\n</table>"
-          }
-        ]
-      },
-      "id": 2
-    }
-  ]
+  "totalEquipments": 20,
+  "count": 10,
+  "offset": 0,
+  "limit": 10,
+  "data": []
 }
 ```
 
-### 7. Get specific routine Information
+#### `GET /targetMuscles`
 
-- **Endpoint :** `/routines/<id>`
-- **Description :** `Making a GET request on this link will return an routine which corresponds to the id.`
-- **Method :** GET
-- **Params :**
-
-```
-id : eg.1
-```
-
-- **API will look like this :**
-
-```
-https://api.bodyworks.akshatjaiswal.me/routines/1
-```
-
-- **Response type :**
-
-```
-category: string[];
-routine: {
-  routine_title: string;
-  routine_description: string;
-  routine_imageUrl: string;
-  workout_summary: {
-     Main Goal: string;
-     Workout Type: string;
-     Training Level: string;
-     Program Duration: string;
-     Days Per Week: string;
-     Time Per Workout: string;
-     Equipment Required: string;
-     Target Gender": string;
-};
-workout_plan: {
-     heading: string | null;
-     day_plan: string;
-}[];
-id : number;
-```
-
-- **Sample Response:**
+Success response (200):
 
 ```json
 {
-  "category": ["Workouts For Men", "Muscle Building", "Full Body", "Bodyweight", "At Home"],
-  "routine": {
-    "routine_title": "Body Like A God: A Complete Bodyweight Muscle Building Plan",
-    "routine_description": "No equipment or gym? No problem. Build muscle at home with this classic bodyweight training system. This is a flexible training system that focuses on the use of exercise complexes.",
-    "routine_imageUrl": "localhost:8000/assets/routine/1.webp",
-    "workout_summary": {
-      "Main Goal": "Build Muscle",
-      "Workout Type": "Full Body",
-      "Training Level": "Beginner",
-      "Program Duration": "4 weeks",
-      "Days Per Week": "4",
-      "Time Per Workout": "30-60 minutes",
-      "Equipment Required": "Bodyweight",
-      "Target Gender": "Male & Female"
-    },
-    "workout_plan": [
-      {
-        "heading": "Complex 1",
-        "day_plan": "<table>\n<tbody>\n<tr>\n<th> Exercise</th>\n<th> Sets</th>\n<th> Reps</th>\n</tr>\n<tr>\n<td colspan=\"4\"> Complex 1</td>\n</tr>\n<tr>\n<td> Push Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Medium-Grip Pull Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Handstand or Jackknife Push Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Diamond Push Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Inverted Rack Curl Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td colspan=\"4\"> Complex 2</td>\n</tr>\n<tr>\n<td> Single-Leg Calf Raise</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Jump Squat</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Walking Lunge</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Hanging Leg Raise</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Short All-Out Sprint Outdoors or on Treadmill</td>\n<td> 2-5</td>\n<td> Distance &amp; Duration varies according to fitness level &amp; experience.</td>\n</tr>\n</tbody>\n</table>"
-      },
-      {
-        "heading": "Complex 2",
-        "day_plan": "<table>\n<tbody>\n<tr>\n<th> Exercise</th>\n<th> Sets</th>\n<th> Reps</th>\n</tr>\n<tr>\n<td colspan=\"4\"> Complex 1</td>\n</tr>\n<tr>\n<td> Feet Elevated Push Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Wide Grip Inverted Row</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Rack Triceps Press or Parallel Bar Dips</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Shoulder Width Reverse Grip Pull Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Floor Crunch or Planks</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td colspan=\"4\"> Complex 2</td>\n</tr>\n<tr>\n<td> Box Jump or Jump Squat</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Bulgarian Split Squat</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Reverse Lunge</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Bench Step Up</td>\n<td> 2-5</td>\n<td> 10-20</td>\n</tr>\n<tr>\n<td> Short All-Out Sprint Outdoors or on Treadmill</td>\n<td> 2-5</td>\n<td> Distance &amp; Duration varies according to fitness level &amp; experience.</td>\n</tr>\n</tbody>\n</table>"
-      }
-    ]
-  },
-  "id": 1
+  "totalTargetMuscles": 15,
+  "count": 10,
+  "offset": 0,
+  "limit": 10,
+  "data": []
 }
 ```
+
+### Users (Authenticated)
+
+#### `GET /users/me`
+
+Get current authenticated user profile, settings, and metadata.
+
+#### `PATCH /users/me/profile`
+
+Update user profile fields.
+
+Request body (all fields optional, but at least one required):
+
+```json
+{
+  "heightCm": 180,
+  "goal": "muscle_gain",
+  "experienceLevel": "intermediate",
+  "gender": "male",
+  "dateOfBirth": "1995-01-01T00:00:00.000Z"
+}
+```
+
+Accepted enum values:
+
+- `goal`: `fat_loss`, `muscle_gain`, `strength`, `general_fitness`
+- `experienceLevel`: `beginner`, `intermediate`, `advanced`
+- `gender`: `male`, `female`, `other`
+
+#### `PATCH /users/me/settings`
+
+Update user settings.
+
+Request body (at least one required):
+
+```json
+{
+  "unitPreference": "metric"
+}
+```
+
+Accepted enum values:
+
+- `unitPreference`: `metric`, `imperial`
+
+#### `POST /users/me/stats`
+
+Create a body stats log entry.
+
+Request body:
+
+```json
+{
+  "weightKg": 75.5,
+  "bodyFatPct": 15.2,
+  "loggedAt": "2024-03-20T10:00:00.000Z"
+}
+```
+
+Validation notes:
+
+- `weightKg` required and must be `> 0`
+- `bodyFatPct` optional, range `0-100`
+- `loggedAt` optional ISO datetime
+
+#### `GET /users/me/stats`
+
+Get paginated body stats history for current user.
+
+Query params:
+
+- `page` (default: `1`)
+- `limit` (default: `20`, min `1`, max `100`)
+
+Success response (200):
+
+```json
+{
+  "data": [],
+  "count": 20,
+  "total": 65,
+  "totalPages": 4,
+  "page": 1,
+  "limit": 20
+}
+```
+
+## HTTP Status Codes
+
+Common status codes returned by the API:
+
+- `200` Success
+- `201` Resource created
+- `400` Validation/client error
+- `401` Missing auth credentials
+- `403` Invalid/expired token
+- `404` Resource not found
+- `409` Conflict (for example, user already exists)
+- `500` Server error

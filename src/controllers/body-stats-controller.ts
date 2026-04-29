@@ -6,10 +6,6 @@ import { db } from '../drizzle/db.js';
 import { userBodyStats } from '../drizzle/schema.js';
 import { logControllerError } from '../lib/logger.js';
 
-interface AuthenticatedRequest extends Request {
-  userId: string;
-}
-
 const createBodyStatsSchema = z.object({
   weightKg: z.number().positive({ message: 'weightKg must be greater than 0.' }),
   bodyFatPct: z

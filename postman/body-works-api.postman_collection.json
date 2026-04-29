@@ -177,8 +177,8 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status code is 200 or 409 for existing user', function () {",
-                  "  pm.expect([200, 409]).to.include(pm.response.code);",
+                  "pm.test('Status code is 201 for new user or 200/409 for existing user', function () {",
+                  "  pm.expect([200, 201, 409]).to.include(pm.response.code);",
                   "});"
                 ]
               }
@@ -217,14 +217,15 @@
                   "});",
                   "pm.test('Login returns access token and user details', function () {",
                   "  const json = pm.response.json();",
-                  "  pm.expect(json).to.have.property('accessToken');",
-                  "  pm.expect(json).to.have.property('id');",
-                  "  pm.expect(json).to.have.property('email');",
+                  "  pm.expect(json).to.have.property('data');",
+                  "  pm.expect(json.data).to.have.property('accessToken');",
+                  "  pm.expect(json.data).to.have.property('id');",
+                  "  pm.expect(json.data).to.have.property('email');",
                   "});",
                   "pm.test('Store auth variables for protected routes', function () {",
                   "  const json = pm.response.json();",
-                  "  pm.collectionVariables.set('accessToken', json.accessToken);",
-                  "  pm.collectionVariables.set('userId', json.id);",
+                  "  pm.collectionVariables.set('accessToken', json.data.accessToken);",
+                  "  pm.collectionVariables.set('userId', json.data.id);",
                   "});"
                 ]
               }
@@ -255,9 +256,10 @@
                   "if (pm.response.code === 200) {",
                   "  pm.test('Refresh updates access token', function () {",
                   "    const json = pm.response.json();",
-                  "    pm.expect(json).to.have.property('accessToken');",
-                  "    pm.collectionVariables.set('accessToken', json.accessToken);",
-                  "    if (json.id) pm.collectionVariables.set('userId', json.id);",
+                  "    pm.expect(json).to.have.property('data');",
+                  "    pm.expect(json.data).to.have.property('accessToken');",
+                  "    pm.collectionVariables.set('accessToken', json.data.accessToken);",
+                  "    if (json.data.id) pm.collectionVariables.set('userId', json.data.id);",
                   "  });",
                   "}"
                 ]

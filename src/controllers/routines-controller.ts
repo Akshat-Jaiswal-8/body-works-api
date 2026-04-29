@@ -13,6 +13,7 @@ import {
   routines,
 } from '../drizzle/schema.js';
 import { logControllerError } from '../lib/logger.js';
+import { mapWorkoutSummary } from '../lib/utils.js';
 
 const decodeQueryValue = (value) => {
   if (typeof value !== 'string' || value.trim().length === 0) {
@@ -335,6 +336,14 @@ export const getRoutines = async (req, res) => {
     const totalRoutines = Number(countResult[0]?.count || 0);
 
     const totalPages = Math.ceil(totalRoutines / limit);
+
+    const data = filteredRoutines.map((routine) => ({
+      ...routine,
+      routine: {
+        ...routine.routine,
+        workout_summary: mapWorkoutSummary(routine.routine.workout_summary),
+      },
+    }));
 
     return res.status(200).send({
       totalRoutines,
