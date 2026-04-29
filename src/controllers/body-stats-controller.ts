@@ -1,7 +1,9 @@
-import type { AuthenticatedRequest, Response } from 'express';
+import { count, desc, eq } from 'drizzle-orm';
+import type { Request, Response } from 'express';
 import z from 'zod';
 
-import { db } from '../lib/db.js';
+import { db } from '../drizzle/db.js';
+import { userBodyStats } from '../drizzle/schema.js';
 import { logControllerError } from '../lib/logger.js';
 
 const createBodyStatsSchema = z.object({
@@ -28,14 +30,29 @@ export const createUserBodyStats = async (req: AuthenticatedRequest, res: Respon
       });
     }
 
-    const stat = await db.userBodyStats.create({
-      data: {
+    const [created] = await db
+      .insert(userBodyStats)
+      .values({
         userId: req.userId,
         weightKg: parsed.data.weightKg,
-        bodyFatPct: parsed.data.bodyFatPct,
-        ...(parsed.data.loggedAt ? { loggedAt: parsed.data.loggedAt } : {}),
-      },
-    });
+        bodyFatPercent: parsed.data.bodyFatPct,
+        ...(parsed.data.loggedAt ? { measuredAt: new Date(parsed.data.loggedAt) } : {}),
+      })
+      .returning({
+        id: userBodyStats.id,
+        userId: userBodyStats.userId,
+        weightKg: userBodyStats.weightKg,
+        bodyFatPercent: userBodyStats.bodyFatPercent,
+        measuredAt: userBodyStats.measuredAt,
+      });
+
+    const stat = {
+      id: created.id,
+      userId: created.userId,
+      weightKg: created.weightKg,
+      bodyFatPct: created.bodyFatPercent,
+      loggedAt: created.measuredAt,
+    };
 
     return res.status(201).json({
       message: 'Body stats logged successfully.',
@@ -56,17 +73,39 @@ export const getUserBodyStats = async (req: AuthenticatedRequest, res: Response)
     const page = Math.max(1, parseInt(req.query?.page as string, 10) || 1);
     const offset = (page - 1) * limit;
 
-    const [total, stats] = await db.$transaction([
-      db.userBodyStats.count({
-        where: { userId: req.userId },
-      }),
-      db.userBodyStats.findMany({
-        where: { userId: req.userId },
-        orderBy: { loggedAt: 'desc' },
-        skip: offset,
-        take: limit,
-      }),
+    const whereClause = eq(userBodyStats.userId, req.userId);
+
+    const [countResult, statsRows] = await Promise.all([
+      db
+        .select({
+          count: count(),
+        })
+        .from(userBodyStats)
+        .where(whereClause),
+      db
+        .select({
+          id: userBodyStats.id,
+          userId: userBodyStats.userId,
+          weightKg: userBodyStats.weightKg,
+          bodyFatPercent: userBodyStats.bodyFatPercent,
+          measuredAt: userBodyStats.measuredAt,
+        })
+        .from(userBodyStats)
+        .where(whereClause)
+        .orderBy(desc(userBodyStats.measuredAt))
+        .limit(limit)
+        .offset(offset),
     ]);
+
+    const stats = statsRows.map((row) => ({
+      id: row.id,
+      userId: row.userId,
+      weightKg: row.weightKg,
+      bodyFatPct: row.bodyFatPercent,
+      loggedAt: row.measuredAt,
+    }));
+
+    const total = Number(countResult[0]?.count || 0);
 
     return res.status(200).json({
       data: stats,

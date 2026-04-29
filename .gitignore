@@ -5,3 +5,5 @@ vcs.xml
 /generated/prisma
 dist
 .DS_Store
+src/drizzle/migrations
+.vscode

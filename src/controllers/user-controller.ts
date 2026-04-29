@@ -1,7 +1,9 @@
+import { eq } from 'drizzle-orm';
 import type { AuthenticatedRequest, Response } from 'express';
 import z from 'zod';
 
-import { db } from '../lib/db.js';
+import { db } from '../drizzle/db.js';
+import { userProfiles, users } from '../drizzle/schema.js';
 import { logControllerError } from '../lib/logger.js';
 
 const goalSchema = z.enum(['fat_loss', 'muscle_gain', 'strength', 'general_fitness']);
@@ -33,27 +35,58 @@ const userSettingsPatchSchema = z
     message: 'At least one settings field is required.',
   });
 
+const extractObject = (value) => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return {};
+  }
+
+  return value;
+};
+
+const extractLegacyData = (value) => {
+  const container = extractObject(value);
+
+  return {
+    legacyProfile: extractObject(container.legacyProfile),
+    legacySettings: extractObject(container.legacySettings),
+  };
+};
+
 export const getMe = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const user = await db.user.findUnique({
-      where: { id: req.userId },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phoneNumber: true,
-        profile: true,
-        settings: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+    const [user] = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        createdAt: users.createdAt,
+        profileUpdatedAt: userProfiles.updatedAt,
+        latestBodyComposition: userProfiles.latestBodyComposition,
+      })
+      .from(users)
+      .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
+      .where(eq(users.id, req.userId))
+      .limit(1);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    return res.status(200).json({ data: user });
+    const { legacyProfile, legacySettings } = extractLegacyData(user.latestBodyComposition);
+    const profile = Object.keys(legacyProfile).length > 0 ? legacyProfile : null;
+    const settings = Object.keys(legacySettings).length > 0 ? legacySettings : null;
+
+    const payload = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      profile,
+      settings,
+      createdAt: user.createdAt,
+      updatedAt: user.profileUpdatedAt || user.createdAt,
+    };
+
+    return res.status(200).json({ data: payload });
   } catch (error) {
     logControllerError(res, 'user.getMe.failed', error, {
       userId: req.userId,
@@ -76,37 +109,64 @@ export const updateMyProfile = async (req: AuthenticatedRequest, res: Response) 
       });
     }
 
-    const existingUser = await db.user.findUnique({
-      where: { id: req.userId },
-      select: { id: true, profile: true },
-    });
+    const [existingUser] = await db
+      .select({
+        id: users.id,
+        latestBodyComposition: userProfiles.latestBodyComposition,
+      })
+      .from(users)
+      .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
+      .where(eq(users.id, req.userId))
+      .limit(1);
 
     if (!existingUser) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
+    const currentMetadata = extractObject(existingUser.latestBodyComposition);
+    const { legacyProfile, legacySettings } = extractLegacyData(currentMetadata);
+
     const mergedProfile = {
-      ...(existingUser.profile || {}),
+      ...legacyProfile,
       ...parsed.data,
     };
 
-    const updatedUser = await db.user.update({
-      where: { id: req.userId },
-      data: {
-        profile: {
-          set: mergedProfile,
+    const now = new Date();
+
+    const nextMetadata = {
+      ...currentMetadata,
+      legacyProfile: mergedProfile,
+      legacySettings,
+    };
+
+    const [updatedProfile] = await db
+      .insert(userProfiles)
+      .values({
+        userId: req.userId,
+        latestBodyComposition: nextMetadata,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: userProfiles.userId,
+        set: {
+          latestBodyComposition: nextMetadata,
+          updatedAt: now,
         },
-      },
-      select: {
-        id: true,
-        profile: true,
-        updatedAt: true,
-      },
-    });
+      })
+      .returning({
+        id: userProfiles.userId,
+        updatedAt: userProfiles.updatedAt,
+      });
+
+    const responseData = {
+      id: updatedProfile?.id || req.userId,
+      profile: mergedProfile,
+      updatedAt: updatedProfile?.updatedAt || now,
+    };
 
     return res.status(200).json({
       message: 'Profile updated successfully.',
-      data: updatedUser,
+      data: responseData,
     });
   } catch (error) {
     logControllerError(res, 'user.updateProfile.failed', error, {
@@ -131,38 +191,67 @@ export const updateMySettings = async (req: AuthenticatedRequest, res: Response)
       });
     }
 
-    const existingUser = await db.user.findUnique({
-      where: { id: req.userId },
-      select: { id: true, settings: true },
-    });
+    const [existingUser] = await db
+      .select({
+        id: users.id,
+        latestBodyComposition: userProfiles.latestBodyComposition,
+      })
+      .from(users)
+      .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
+      .where(eq(users.id, req.userId))
+      .limit(1);
 
     if (!existingUser) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
+    const currentMetadata = extractObject(existingUser.latestBodyComposition);
+    const { legacyProfile, legacySettings } = extractLegacyData(currentMetadata);
+
     const mergedSettings = {
       unitPreference: 'metric' as const,
-      ...(existingUser.settings || {}),
+      ...legacySettings,
       ...parsed.data,
     };
 
-    const updatedUser = await db.user.update({
-      where: { id: req.userId },
-      data: {
-        settings: {
-          set: mergedSettings,
+    const now = new Date();
+
+    const nextMetadata = {
+      ...currentMetadata,
+      legacyProfile,
+      legacySettings: mergedSettings,
+    };
+
+    const [updatedSettings] = await db
+      .insert(userProfiles)
+      .values({
+        userId: req.userId,
+        unitPreference: mergedSettings.unitPreference,
+        latestBodyComposition: nextMetadata,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: userProfiles.userId,
+        set: {
+          unitPreference: mergedSettings.unitPreference,
+          latestBodyComposition: nextMetadata,
+          updatedAt: now,
         },
-      },
-      select: {
-        id: true,
-        settings: true,
-        updatedAt: true,
-      },
-    });
+      })
+      .returning({
+        id: userProfiles.userId,
+        updatedAt: userProfiles.updatedAt,
+      });
+
+    const responseData = {
+      id: updatedSettings?.id || req.userId,
+      settings: mergedSettings,
+      updatedAt: updatedSettings?.updatedAt || now,
+    };
 
     return res.status(200).json({
       message: 'Settings updated successfully.',
-      data: updatedUser,
+      data: responseData,
     });
   } catch (error) {
     logControllerError(res, 'user.updateSettings.failed', error, {

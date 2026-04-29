@@ -1,10 +1,12 @@
-import type { User } from '@prisma/client';
+import { and, asc, count, eq, lte } from 'drizzle-orm';
 import type { CookieOptions, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import z from 'zod';
 
 import { MAX_DEVICE_SESSIONS, REFRESH_TOKEN_EXPIRES_MS } from '../constants/auth-constant.js';
+import { db } from '../drizzle/db.js';
+import { refreshTokens, users } from '../drizzle/schema.js';
 import {
   comparePassword,
   generateAccessToken,
@@ -12,13 +14,12 @@ import {
   hashPassword,
   hashRefreshToken,
 } from '../helpers/auth-helper.js';
-import { db } from '../lib/db.js';
 import { logControllerError, serializeError } from '../lib/logger.js';
 
 interface IRegisterUserRequestBody {
   name: string;
   email: string;
-  phone_number: string;
+  phone_number?: string;
   password: string;
 }
 
@@ -32,21 +33,24 @@ const userSchema = z.object({
 
   email: z.email(),
 
-  phone_number: z.string().transform((val, ctx) => {
-    const phone = parsePhoneNumberFromString(val, {
-      defaultCountry: 'IN',
-      extract: false,
-    });
-    if (phone && phone.isValid()) {
-      return phone.number;
-    }
-    ctx.addIssue({
-      code: 'custom',
-      message: 'Invalid phone number',
-    });
+  phone_number: z
+    .string()
+    .transform((val, ctx) => {
+      const phone = parsePhoneNumberFromString(val, {
+        defaultCountry: 'IN',
+        extract: false,
+      });
+      if (phone && phone.isValid()) {
+        return phone.number;
+      }
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Invalid phone number',
+      });
 
-    return z.NEVER;
-  }),
+      return z.NEVER;
+    })
+    .optional(),
 
   password: z
     .string()
@@ -78,15 +82,19 @@ export const registerUser = async (req: Request, res: Response) => {
   try {
     const { name, email, phone_number, password } = req.body as IRegisterUserRequestBody;
 
-    if (!name || !email || !phone_number || !password) {
+    if (!name || !email || !password) {
       return res.status(400).json({
         message: 'All the input fields are required.',
       });
     }
 
-    const oldUser = await db.user.findUnique({
-      where: { email },
-    });
+    const [oldUser] = await db
+      .select({
+        id: users.id,
+      })
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
 
     if (oldUser)
       return res.status(409).json({ message: 'User already exist. Please login again.' });
@@ -107,24 +115,26 @@ export const registerUser = async (req: Request, res: Response) => {
 
     const passwordHash = await hashPassword(parsedSchema.password);
 
-    const user: User = await db.user.create({
-      data: {
+    const [user] = await db
+      .insert(users)
+      .values({
         name: parsedSchema.name,
         email: parsedSchema.email,
-        phoneNumber: parsedSchema.phone_number,
         passwordHash,
-      },
-    });
+      })
+      .returning({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+      });
 
     const accessToken = generateAccessToken(user.id);
     const refreshToken = generateRefreshToken(user.id);
 
-    await db.refreshToken.create({
-      data: {
-        token: hashRefreshToken(refreshToken),
-        userId: user.id,
-        expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
-      },
+    await db.insert(refreshTokens).values({
+      token: hashRefreshToken(refreshToken),
+      userId: user.id,
+      expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
     });
 
     res.cookie('refreshToken', refreshToken, getRefreshCookieOptions());
@@ -139,11 +149,11 @@ export const registerUser = async (req: Request, res: Response) => {
       message: 'user created successfully.',
     });
   } catch (error) {
-    logControllerError(
-      res,
-      'Error registering the user.',
-      error ?? new Error('Register user error'),
-    );
+    logControllerError(res, 'auth.register.failed', error, {
+      payload: {
+        email: req.body?.email,
+      },
+    });
     return res.status(500).json({
       success: false,
       message: 'Error registering the user.',
@@ -174,9 +184,16 @@ export const loginUser = async (req: Request, res: Response) => {
 
     const parsedSchema = result.data;
 
-    const user = await db.user.findUnique({
-      where: { email: parsedSchema.email },
-    });
+    const [user] = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        passwordHash: users.passwordHash,
+      })
+      .from(users)
+      .where(eq(users.email, parsedSchema.email))
+      .limit(1);
 
     if (!user) {
       return res.status(404).json({
@@ -197,30 +214,37 @@ export const loginUser = async (req: Request, res: Response) => {
     const accessToken = generateAccessToken(user.id);
     const refreshToken = generateRefreshToken(user.id);
 
-    await db.refreshToken.deleteMany({
-      where: {
-        userId: user.id,
-        expiresAt: { lte: new Date() },
-      },
-    });
+    await db
+      .delete(refreshTokens)
+      .where(and(eq(refreshTokens.userId, user.id), lte(refreshTokens.expiresAt, new Date())));
 
-    const sessionCount = await db.refreshToken.count({ where: { userId: user.id } });
+    const sessionCountResult = await db
+      .select({
+        count: count(),
+      })
+      .from(refreshTokens)
+      .where(eq(refreshTokens.userId, user.id));
+    const sessionCount = Number(sessionCountResult[0]?.count || 0);
 
-    // if max device limit is used, delete the oldest session before adding a new one
     if (sessionCount >= MAX_DEVICE_SESSIONS) {
-      const oldest = await db.refreshToken.findFirst({
-        where: { userId: user.id },
-        orderBy: { createdAt: 'asc' },
-      });
-      if (oldest) await db.refreshToken.delete({ where: { id: oldest.id } });
+      const [oldest] = await db
+        .select({
+          id: refreshTokens.id,
+        })
+        .from(refreshTokens)
+        .where(eq(refreshTokens.userId, user.id))
+        .orderBy(asc(refreshTokens.createdAt))
+        .limit(1);
+
+      if (oldest) {
+        await db.delete(refreshTokens).where(eq(refreshTokens.id, oldest.id));
+      }
     }
 
-    await db.refreshToken.create({
-      data: {
-        token: hashRefreshToken(refreshToken),
-        userId: user.id,
-        expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
-      },
+    await db.insert(refreshTokens).values({
+      token: hashRefreshToken(refreshToken),
+      userId: user.id,
+      expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
     });
 
     res.cookie('refreshToken', refreshToken, getRefreshCookieOptions());
@@ -261,34 +285,38 @@ export const accessTokenFromRefreshToken = async (req: Request, res: Response) =
       });
     }
 
-    const storedToken = await db.refreshToken.findUnique({
-      where: { token: hashRefreshToken(refreshToken) },
-    });
+    const hashedToken = hashRefreshToken(refreshToken);
+
+    const [storedToken] = await db
+      .select({
+        id: refreshTokens.id,
+        userId: refreshTokens.userId,
+        expiresAt: refreshTokens.expiresAt,
+      })
+      .from(refreshTokens)
+      .where(eq(refreshTokens.token, hashedToken))
+      .limit(1);
 
     if (!storedToken) {
-      // Token was not found in the database. This can happen due to legitimate rotation or logout,
-      // so we treat it as an invalid/unknown token and simply deny the request without revoking
-      // all of the user's other sessions to avoid race-condition induced logouts.
-      return res.status(403).json({ error: 'Invalid or unknown refresh token.' });
+      await db.delete(refreshTokens).where(eq(refreshTokens.userId, decoded.id as string));
+      return res.status(403).json({ error: 'Refresh token has been revoked.' });
     }
 
     if (storedToken.expiresAt <= new Date()) {
-      await db.refreshToken.deleteMany({ where: { token: hashRefreshToken(refreshToken) } });
+      await db.delete(refreshTokens).where(eq(refreshTokens.token, hashedToken));
       return res.status(403).json({ error: 'Refresh token has expired.' });
     }
 
-    await db.refreshToken.delete({ where: { token: hashRefreshToken(refreshToken) } });
+    await db.delete(refreshTokens).where(eq(refreshTokens.token, hashedToken));
 
     const userId = decoded.id as string;
     const accessToken = generateAccessToken(userId);
     const nextRefreshToken = generateRefreshToken(userId);
 
-    await db.refreshToken.create({
-      data: {
-        token: hashRefreshToken(nextRefreshToken),
-        userId,
-        expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
-      },
+    await db.insert(refreshTokens).values({
+      token: hashRefreshToken(nextRefreshToken),
+      userId,
+      expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
     });
 
     return res
@@ -306,7 +334,7 @@ export const logoutUser = async (req: Request, res: Response) => {
 
   try {
     if (refreshToken) {
-      await db.refreshToken.deleteMany({ where: { token: hashRefreshToken(refreshToken) } });
+      await db.delete(refreshTokens).where(eq(refreshTokens.token, hashRefreshToken(refreshToken)));
     }
   } catch (error) {
     logControllerError(res, 'logout failed.', error as Error);
