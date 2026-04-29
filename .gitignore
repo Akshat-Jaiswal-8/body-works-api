@@ -7,3 +7,4 @@ vcs.xml
 dist
 .DS_Store
 src/drizzle/migrations
+.vscode

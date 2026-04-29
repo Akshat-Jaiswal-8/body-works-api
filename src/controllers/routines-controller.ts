@@ -340,8 +340,8 @@ export const getRoutines = async (req, res) => {
       totalRoutines,
       totalPages,
       count: filteredRoutines.length,
-      offset: offset,
-      limit: limit || null,
+      page,
+      limit,
       data: filteredRoutines,
     });
   } catch (error) {

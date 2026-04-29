@@ -1,54 +1,68 @@
-import { count } from 'drizzle-orm';
+import { count, ilike } from 'drizzle-orm';
+import type { Request, Response } from 'express';
 
 import { db } from '../drizzle/db.js';
 import { bodyParts } from '../drizzle/schema.js';
 import { logControllerError } from '../lib/logger.js';
 
-export const getBodyParts = async (req, res) => {
-  try {
-    const limit = parseInt(req.query?.limit) || 10;
-    const offset = parseInt(req.query?.offset) || 0;
+interface IBodyPartsRequest extends Request {
+  query: {
+    limit?: string;
+    page?: string;
+    search?: string;
+  };
+}
 
-    if (offset < 0) {
+export const getBodyParts = async (req: IBodyPartsRequest, res: Response) => {
+  try {
+    const limit = parseInt(req.query?.limit as string) || 10;
+    const page = parseInt(req.query?.page as string) || 1;
+    const offset = (page - 1) * limit;
+    const search = req.query?.search ? decodeURIComponent(req.query.search) : undefined;
+
+    if (page <= 0) {
       return res.status(400).send({
-        message: 'Offset must be a non-negative integer.',
+        message: 'Page must be a positive integer.',
       });
     }
+
+    if (limit <= 0) {
+      return res.status(400).send({
+        message: 'Limit must be a positive integer.',
+      });
+    }
+
+    const searchPattern = search ? `%${search}%` : undefined;
+    const whereClause = searchPattern ? ilike(bodyParts.name, searchPattern) : undefined;
 
     const totalResult = await db
       .select({
         count: count(),
       })
-      .from(bodyParts);
+      .from(bodyParts)
+      .where(whereClause);
 
-    const bodyPartsData =
-      Number.isInteger(limit) && limit > 0
-        ? await db
-            .select({
-              id: bodyParts.id,
-              bodyPart: bodyParts.name,
-              exerciseCount: bodyParts.exerciseCount,
-              imageUrl: bodyParts.imageUrl,
-            })
-            .from(bodyParts)
-            .offset(offset)
-            .limit(limit)
-        : await db
-            .select({
-              id: bodyParts.id,
-              bodyPart: bodyParts.name,
-              exerciseCount: bodyParts.exerciseCount,
-              imageUrl: bodyParts.imageUrl,
-            })
-            .from(bodyParts)
-            .offset(offset);
+    const bodyPartsData = await db
+      .select({
+        id: bodyParts.id,
+        bodyPart: bodyParts.name,
+        exerciseCount: bodyParts.exerciseCount,
+        imageUrl: bodyParts.imageUrl,
+      })
+      .from(bodyParts)
+      .where(whereClause)
+      .offset(offset)
+      .limit(limit);
+
     const totalBodyParts = Number(totalResult[0]?.count || 0);
+    const totalPages = Math.ceil(totalBodyParts / limit);
 
     return res.status(200).send({
-      totalBodyParts: totalBodyParts,
+      totalBodyParts,
+      totalPages,
       count: bodyPartsData.length,
-      offset: offset,
-      limit: limit || null,
+      page,
+      limit,
       data: bodyPartsData,
     });
   } catch (error) {
