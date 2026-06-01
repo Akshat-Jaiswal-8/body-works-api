@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import helmet from 'helmet';
 
-import { generalLimiter, strictLimiter } from './helpers/rate-limiter.js';
+import { generalLimiter } from './helpers/rate-limiter.js';
 import { logger, serializeError } from './lib/logger.js';
 import { requestLoggerMiddleware } from './middleware/logger-middleware.js';
 import loginRoutes from './routes/auth-routes.js';
@@ -61,13 +61,13 @@ app.use(compression());
 
 app.use(generalLimiter);
 
-app.use('/api/v1/auth', generalLimiter, loginRoutes);
-app.use('/api/v1/exercises', generalLimiter, exerciseRoutes);
-app.use('/api/v1/bodyParts', generalLimiter, bodyPartsRoutes);
-app.use('/api/v1/targetMuscles', generalLimiter, targetMusclesRoutes);
-app.use('/api/v1/equipments', generalLimiter, equipmentsRoutes);
-app.use('/api/v1/routines', strictLimiter, routinesRoutes);
-app.use('/api/v1/users', generalLimiter, usersRoutes);
+app.use('/api/v1/auth', loginRoutes);
+app.use('/api/v1/exercises', exerciseRoutes);
+app.use('/api/v1/bodyParts', bodyPartsRoutes);
+app.use('/api/v1/targetMuscles', targetMusclesRoutes);
+app.use('/api/v1/equipments', equipmentsRoutes);
+app.use('/api/v1/routines', routinesRoutes);
+app.use('/api/v1/users', usersRoutes);
 
 app.get('/health', (_req, res) => {
   res.status(200).json({

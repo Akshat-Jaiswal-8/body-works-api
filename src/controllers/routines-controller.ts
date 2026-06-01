@@ -1,9 +1,13 @@
+import { randomUUID } from 'crypto';
 import { and, asc, count, eq, exists, ilike, inArray, isNotNull, or, sql } from 'drizzle-orm';
+import type { AuthenticatedRequest } from 'express';
 
 import { db } from '../drizzle/db.js';
 import {
   routineCategories,
   routineCategoryOptions,
+  routineDayExercises,
+  routineDays,
   routineEquipmentOptions,
   routineEquipments,
   routineGenderOptions,
@@ -14,6 +18,36 @@ import {
 } from '../drizzle/schema.js';
 import { logControllerError } from '../lib/logger.js';
 import { mapWorkoutSummary } from '../lib/utils.js';
+
+interface ExerciseInput {
+  exerciseId: string;
+  sortOrder: number;
+  sets?: number;
+  reps?: number;
+  duration?: string;
+  restSeconds?: number;
+  notes?: string;
+}
+
+interface DayInput {
+  dayNumber: number;
+  heading?: string;
+  notes?: string;
+  exercises?: ExerciseInput[];
+}
+
+interface RoutinesBody {
+  title: string;
+  days?: DayInput[];
+  description?: string;
+  imageUrl?: string;
+  gender?: string;
+  level?: string;
+  mainGoal?: string;
+  workoutType?: string;
+  durationWeeks?: number;
+  timePerWorkout?: string;
+}
 
 const decodeQueryValue = (value) => {
   if (typeof value !== 'string' || value.trim().length === 0) {
@@ -348,10 +382,10 @@ export const getRoutines = async (req, res) => {
     return res.status(200).send({
       totalRoutines,
       totalPages,
-      count: filteredRoutines.length,
+      count: data.length,
       page,
       limit,
-      data: filteredRoutines,
+      data,
     });
   } catch (error) {
     logControllerError(res, 'routines.list.failed', error, {
@@ -371,15 +405,15 @@ export const getRoutine = async (req, res) => {
       return res.status(400).send({ message: 'RoutineId not provided.' });
     }
 
-    const routineExternalId = parseInt(id, 10);
-
-    if (Number.isNaN(routineExternalId)) {
-      return res.status(400).send({ message: 'Invalid RoutineId format.' });
-    }
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    const whereClause = isUuid
+      ? eq(routines.id, id)
+      : eq(routines.externalRoutineId, parseInt(id, 10));
 
     const [routineRow] = await db
       .select({
         id: routines.id,
+        source: routines.source,
         externalRoutineId: routines.externalRoutineId,
         title: routines.title,
         description: routines.description,
@@ -398,11 +432,64 @@ export const getRoutine = async (req, res) => {
       .leftJoin(routineLevelOptions, eq(routines.levelId, routineLevelOptions.id))
       .leftJoin(routineMainGoalOptions, eq(routines.mainGoalId, routineMainGoalOptions.id))
       .leftJoin(routineWorkoutTypeOptions, eq(routines.workoutTypeId, routineWorkoutTypeOptions.id))
-      .where(eq(routines.externalRoutineId, routineExternalId))
+      .where(whereClause)
       .limit(1);
 
     if (!routineRow) {
       return res.status(404).send({ message: 'Routine not found.' });
+    }
+
+    if (routineRow.source === 'custom') {
+      const days = await db
+        .select()
+        .from(routineDays)
+        .where(eq(routineDays.routineId, routineRow.id))
+        .orderBy(asc(routineDays.dayNumber));
+
+      const dayIds = days.map((d) => d.id);
+      const exercisesById = new Map<string, (typeof routineDayExercises.$inferSelect)[]>();
+
+      if (dayIds.length > 0) {
+        const exRows = await db
+          .select()
+          .from(routineDayExercises)
+          .where(inArray(routineDayExercises.routineDayId, dayIds))
+          .orderBy(asc(routineDayExercises.sortOrder));
+
+        for (const ex of exRows) {
+          const list = exercisesById.get(ex.routineDayId) || [];
+          list.push(ex);
+          exercisesById.set(ex.routineDayId, list);
+        }
+      }
+
+      const daysPayload = days.map((d) => ({
+        id: d.id,
+        dayNumber: d.dayNumber,
+        heading: d.heading,
+        notes: d.notes,
+        exercises: (exercisesById.get(d.id) || []).map((ex) => ({
+          id: ex.id,
+          exerciseId: ex.exerciseId,
+          sortOrder: ex.sortOrder,
+          sets: ex.sets,
+          reps: ex.reps,
+          duration: ex.duration,
+          restSeconds: ex.restSeconds,
+          notes: ex.notes,
+        })),
+      }));
+
+      return res.status(200).send({
+        data: {
+          id: routineRow.id,
+          source: routineRow.source,
+          title: routineRow.title,
+          description: routineRow.description,
+          imageUrl: routineRow.imageUrl,
+          days: daysPayload,
+        },
+      });
     }
 
     const [categoriesByRoutine, equipmentByRoutine] = await Promise.all([
@@ -605,6 +692,84 @@ export const getFilteredRoutines = async (req, res) => {
     logControllerError(res, 'routines.filters.failed', error);
     return res.status(500).send({
       message: 'Unable to get routine categories. Please try again later.',
+    });
+  }
+};
+
+const slugify = (text: string) =>
+  text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+    .slice(0, 100);
+
+export const postRoutines = async (req: AuthenticatedRequest, res) => {
+  try {
+    const { title, description, imageUrl, days = [] } = req.body;
+
+    if (!title || typeof title !== 'string' || title.trim().length === 0) {
+      return res.status(400).send({ message: 'Title is required.' });
+    }
+
+    const slug = `${slugify(title)}-${randomUUID().slice(0, 8)}`;
+
+    const routine = await db.transaction(async (tx) => {
+      const [inserted] = await tx
+        .insert(routines)
+        .values({
+          title: title.trim(),
+          slug,
+          description: description || null,
+          imageUrl: imageUrl || null,
+          source: 'custom',
+          userId: req.userId,
+        })
+        .returning();
+
+      const createdDays = [];
+
+      for (const day of days) {
+        const [insertedDay] = await tx
+          .insert(routineDays)
+          .values({
+            routineId: inserted.id,
+            dayNumber: day.dayNumber,
+            heading: day.heading || null,
+            notes: day.notes || null,
+          })
+          .returning();
+
+        if (day.exercises?.length > 0) {
+          await tx.insert(routineDayExercises).values(
+            day.exercises.map((ex) => ({
+              routineDayId: insertedDay.id,
+              exerciseId: ex.exerciseId,
+              sortOrder: ex.sortOrder,
+              sets: ex.sets?.toString() || null,
+              reps: ex.reps?.toString() || null,
+              duration: ex.duration || null,
+              restSeconds: ex.restSeconds || null,
+              notes: ex.notes || null,
+            })),
+          );
+        }
+
+        createdDays.push({
+          id: insertedDay.id,
+          dayNumber: insertedDay.dayNumber,
+          heading: insertedDay.heading,
+          notes: insertedDay.notes,
+        });
+      }
+
+      return { ...inserted, days: createdDays };
+    });
+
+    return res.status(201).send({ data: routine });
+  } catch (error) {
+    logControllerError(res, 'routines.create.failed', error, { body: req.body });
+    return res.status(500).send({
+      message: 'Failed to create routine. Please try again later.',
     });
   }
 };

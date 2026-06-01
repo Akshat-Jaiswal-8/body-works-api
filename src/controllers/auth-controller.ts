@@ -1,10 +1,13 @@
 import { and, asc, count, eq, lte } from 'drizzle-orm';
 import type { CookieOptions, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import z from 'zod';
 
-import { MAX_DEVICE_SESSIONS, REFRESH_TOKEN_EXPIRES_MS } from '../constants/auth-constant.js';
+import {
+  LONG_REFRESH_TOKEN_EXPIRES_MS,
+  MAX_DEVICE_SESSIONS,
+  SHORT_REFRESH_TOKEN_EXPIRES_MS,
+} from '../constants/auth-constant.js';
 import { db } from '../drizzle/db.js';
 import { refreshTokens, users } from '../drizzle/schema.js';
 import {
@@ -19,11 +22,10 @@ import { logControllerError, serializeError } from '../lib/logger.js';
 interface IRegisterUserRequestBody {
   name: string;
   email: string;
-  phone_number?: string;
   password: string;
 }
 
-const refreshCookiePath = '/api/v1/auth';
+const refreshCookiePath = '/';
 
 const userSchema = z.object({
   name: z
@@ -32,25 +34,6 @@ const userSchema = z.object({
     .max(50, { error: 'Name should have atmost 50 characters.' }),
 
   email: z.email(),
-
-  phone_number: z
-    .string()
-    .transform((val, ctx) => {
-      const phone = parsePhoneNumberFromString(val, {
-        defaultCountry: 'IN',
-        extract: false,
-      });
-      if (phone && phone.isValid()) {
-        return phone.number;
-      }
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Invalid phone number',
-      });
-
-      return z.NEVER;
-    })
-    .optional(),
 
   password: z
     .string()
@@ -66,7 +49,7 @@ const userSchema = z.object({
 
 const loginSchema = userSchema.pick({ email: true, password: true });
 
-const getRefreshCookieOptions = (): CookieOptions => {
+const getRefreshCookieOptions = (rememberMe: boolean): CookieOptions => {
   const isProduction = process.env.NODE_ENV === 'production';
 
   return {
@@ -74,13 +57,13 @@ const getRefreshCookieOptions = (): CookieOptions => {
     secure: isProduction,
     sameSite: isProduction ? 'none' : 'lax',
     path: refreshCookiePath,
-    maxAge: REFRESH_TOKEN_EXPIRES_MS,
+    maxAge: rememberMe ? LONG_REFRESH_TOKEN_EXPIRES_MS : SHORT_REFRESH_TOKEN_EXPIRES_MS,
   };
 };
 
 export const registerUser = async (req: Request, res: Response) => {
   try {
-    const { name, email, phone_number, password } = req.body as IRegisterUserRequestBody;
+    const { name, email, password } = req.body as IRegisterUserRequestBody;
 
     if (!name || !email || !password) {
       return res.status(400).json({
@@ -129,15 +112,15 @@ export const registerUser = async (req: Request, res: Response) => {
       });
 
     const accessToken = generateAccessToken(user.id);
-    const refreshToken = generateRefreshToken(user.id);
+    const refreshToken = generateRefreshToken(user.id, false);
 
     await db.insert(refreshTokens).values({
       token: hashRefreshToken(refreshToken),
       userId: user.id,
-      expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
+      expiresAt: new Date(Date.now() + SHORT_REFRESH_TOKEN_EXPIRES_MS),
     });
 
-    res.cookie('refreshToken', refreshToken, getRefreshCookieOptions());
+    res.cookie('refreshToken', refreshToken, getRefreshCookieOptions(false));
 
     return res.status(201).json({
       data: {
@@ -146,7 +129,7 @@ export const registerUser = async (req: Request, res: Response) => {
         email: user.email,
         accessToken,
       },
-      message: 'user created successfully.',
+      message: 'User created successfully.',
     });
   } catch (error) {
     logControllerError(res, 'auth.register.failed', error, {
@@ -164,7 +147,7 @@ export const registerUser = async (req: Request, res: Response) => {
 
 export const loginUser = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, rememberMe } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: 'All the input fields are required.' });
@@ -212,7 +195,7 @@ export const loginUser = async (req: Request, res: Response) => {
     }
 
     const accessToken = generateAccessToken(user.id);
-    const refreshToken = generateRefreshToken(user.id);
+    const refreshToken = generateRefreshToken(user.id, rememberMe);
 
     await db
       .delete(refreshTokens)
@@ -244,10 +227,12 @@ export const loginUser = async (req: Request, res: Response) => {
     await db.insert(refreshTokens).values({
       token: hashRefreshToken(refreshToken),
       userId: user.id,
-      expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
+      expiresAt: new Date(
+        Date.now() + (rememberMe ? LONG_REFRESH_TOKEN_EXPIRES_MS : SHORT_REFRESH_TOKEN_EXPIRES_MS),
+      ),
     });
 
-    res.cookie('refreshToken', refreshToken, getRefreshCookieOptions());
+    res.cookie('refreshToken', refreshToken, getRefreshCookieOptions(rememberMe));
 
     return res.status(200).json({
       data: {
@@ -311,16 +296,20 @@ export const accessTokenFromRefreshToken = async (req: Request, res: Response) =
 
     const userId = decoded.id as string;
     const accessToken = generateAccessToken(userId);
-    const nextRefreshToken = generateRefreshToken(userId);
+    const wasRememberMe = !!decoded.rememberMe;
+    const nextRefreshToken = generateRefreshToken(userId, wasRememberMe);
 
     await db.insert(refreshTokens).values({
       token: hashRefreshToken(nextRefreshToken),
       userId,
-      expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
+      expiresAt: new Date(
+        Date.now() +
+          (wasRememberMe ? LONG_REFRESH_TOKEN_EXPIRES_MS : SHORT_REFRESH_TOKEN_EXPIRES_MS),
+      ),
     });
 
     return res
-      .cookie('refreshToken', nextRefreshToken, getRefreshCookieOptions())
+      .cookie('refreshToken', nextRefreshToken, getRefreshCookieOptions(wasRememberMe))
       .status(200)
       .json({ data: { id: userId, accessToken } });
   } catch (error) {
@@ -345,7 +334,7 @@ export const logoutUser = async (req: Request, res: Response) => {
     });
   }
 
-  const { maxAge: _, ...clearOptions } = getRefreshCookieOptions();
+  const { maxAge: _, ...clearOptions } = getRefreshCookieOptions(false);
   res.clearCookie('refreshToken', clearOptions);
   return res.status(200).json({ message: 'Logged out successfully.' });
 };

@@ -1,5 +1,5 @@
-import { count, desc, eq } from 'drizzle-orm';
-import type { Request, Response } from 'express';
+import { type SQL, and, asc, count, desc, eq, gte, lte } from 'drizzle-orm';
+import type { AuthenticatedRequest, Response } from 'express';
 import z from 'zod';
 
 import { db } from '../drizzle/db.js';
@@ -12,6 +12,11 @@ const createBodyStatsSchema = z.object({
     .number()
     .min(0, { message: 'bodyFatPct must be between 0 and 100.' })
     .max(100, { message: 'bodyFatPct must be between 0 and 100.' })
+    .optional(),
+  bmi: z
+    .number()
+    .positive({ message: 'bmi must be greater than 0.' })
+    .max(100, { message: 'bmi must be 100 or less.' })
     .optional(),
   loggedAt: z.iso.datetime({ message: 'loggedAt must be a valid ISO datetime string.' }).optional(),
 });
@@ -36,6 +41,7 @@ export const createUserBodyStats = async (req: AuthenticatedRequest, res: Respon
         userId: req.userId,
         weightKg: parsed.data.weightKg,
         bodyFatPercent: parsed.data.bodyFatPct,
+        bmi: parsed.data.bmi,
         ...(parsed.data.loggedAt ? { measuredAt: new Date(parsed.data.loggedAt) } : {}),
       })
       .returning({
@@ -43,6 +49,7 @@ export const createUserBodyStats = async (req: AuthenticatedRequest, res: Respon
         userId: userBodyStats.userId,
         weightKg: userBodyStats.weightKg,
         bodyFatPercent: userBodyStats.bodyFatPercent,
+        bmi: userBodyStats.bmi,
         measuredAt: userBodyStats.measuredAt,
       });
 
@@ -51,6 +58,7 @@ export const createUserBodyStats = async (req: AuthenticatedRequest, res: Respon
       userId: created.userId,
       weightKg: created.weightKg,
       bodyFatPct: created.bodyFatPercent,
+      bmi: created.bmi,
       loggedAt: created.measuredAt,
     };
 
@@ -73,7 +81,28 @@ export const getUserBodyStats = async (req: AuthenticatedRequest, res: Response)
     const page = Math.max(1, parseInt(req.query?.page as string, 10) || 1);
     const offset = (page - 1) * limit;
 
-    const whereClause = eq(userBodyStats.userId, req.userId);
+    const from = req.query?.from as string | undefined;
+    const to = req.query?.to as string | undefined;
+    const sort = (req.query?.sort as string) === 'asc' ? 'asc' : 'desc';
+
+    const conditions: SQL[] = [eq(userBodyStats.userId, req.userId)];
+
+    if (from) {
+      const fromDate = new Date(from);
+      if (!isNaN(fromDate.getTime())) {
+        conditions.push(gte(userBodyStats.measuredAt, fromDate));
+      }
+    }
+
+    if (to) {
+      const toDate = new Date(to);
+      if (!isNaN(toDate.getTime())) {
+        conditions.push(lte(userBodyStats.measuredAt, toDate));
+      }
+    }
+
+    const whereClause = and(...conditions);
+    const orderFn = sort === 'asc' ? asc : desc;
 
     const [countResult, statsRows] = await Promise.all([
       db
@@ -88,11 +117,12 @@ export const getUserBodyStats = async (req: AuthenticatedRequest, res: Response)
           userId: userBodyStats.userId,
           weightKg: userBodyStats.weightKg,
           bodyFatPercent: userBodyStats.bodyFatPercent,
+          bmi: userBodyStats.bmi,
           measuredAt: userBodyStats.measuredAt,
         })
         .from(userBodyStats)
         .where(whereClause)
-        .orderBy(desc(userBodyStats.measuredAt))
+        .orderBy(orderFn(userBodyStats.measuredAt))
         .limit(limit)
         .offset(offset),
     ]);
@@ -102,6 +132,7 @@ export const getUserBodyStats = async (req: AuthenticatedRequest, res: Response)
       userId: row.userId,
       weightKg: row.weightKg,
       bodyFatPct: row.bodyFatPercent,
+      bmi: row.bmi,
       loggedAt: row.measuredAt,
     }));
 
