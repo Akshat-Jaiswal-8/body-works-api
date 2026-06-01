@@ -96,6 +96,22 @@ export const exercises = pgTable(
   ],
 );
 
+export const userFavoriteExercises = pgTable(
+  'user_favorite_exercises',
+  {
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id),
+    exerciseId: uuid('exercise_id')
+      .notNull()
+      .references(() => exercises.id),
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.exerciseId] }),
+    index('user_favorite_exercises_exercise_idx').on(table.exerciseId),
+  ],
+);
+
 /* ----------------------------- */
 /* Routine filter lookup tables  */
 /* ----------------------------- */
@@ -195,6 +211,8 @@ export const routines = pgTable(
     slug: text('slug').notNull(),
     description: text('description'),
     imageUrl: text('image_url'),
+
+    userId: uuid('user_id').references(() => users.id),
 
     genderId: uuid('gender_id').references(() => routineGenderOptions.id),
     levelId: uuid('level_id').references(() => routineLevelOptions.id),
@@ -394,6 +412,35 @@ export const userProfiles = pgTable('user_profiles', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
+export const routineDaysRelations = relations(routineDays, ({ one, many }) => ({
+  routine: one(routines, {
+    fields: [routineDays.routineId],
+    references: [routines.id],
+  }),
+  exercises: many(routineDayExercises),
+}));
+
+export const routineDayExercisesRelations = relations(routineDayExercises, ({ one }) => ({
+  routineDay: one(routineDays, {
+    fields: [routineDayExercises.routineDayId],
+    references: [routineDays.id],
+  }),
+  exercise: one(exercises, {
+    fields: [routineDayExercises.exerciseId],
+    references: [exercises.id],
+  }),
+}));
+
+export const routinesRelations = relations(routines, ({ one, many }) => ({
+  user: one(users, {
+    fields: [routines.userId],
+    references: [users.id],
+  }),
+  days: many(routineDays),
+  categories: many(routineCategories),
+  equipments: many(routineEquipments),
+}));
+
 export const usersRelations = relations(users, ({ one, many }) => ({
   profile: one(userProfiles, {
     fields: [users.id],
@@ -401,6 +448,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   }),
   bodyStats: many(userBodyStats),
   refreshTokens: many(refreshTokens),
+  routines: many(routines),
+  favoriteExercises: many(userFavoriteExercises),
 }));
 
 export const userProfilesRelations = relations(userProfiles, ({ one }) => ({
